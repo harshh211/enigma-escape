@@ -40,7 +40,7 @@ class MissionScreen extends StatelessWidget {
                 icon: const Icon(Icons.search),
                 tooltip: 'Cipher Lock',
                 onPressed: () =>
-                    Navigator.pushNamed(context, '/wordsearch'),
+                    Navigator.pushNamed(context, '/levels'),
               ),
               IconButton(
                 icon: const Icon(Icons.list_alt),
@@ -191,7 +191,7 @@ class _MissionBody extends StatelessWidget {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: () =>
-                  Navigator.pushNamed(context, '/wordsearch'),
+                  Navigator.pushNamed(context, '/levels'),
               icon: const Icon(Icons.search),
               label: const Text('OPEN WORD SEARCH CIPHER LOCK'),
               style: ElevatedButton.styleFrom(

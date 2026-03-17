@@ -6,7 +6,8 @@ import '../utils/word_search_solver.dart';
 import '../widgets/hint_overlay.dart';
 
 class WordSearchScreen extends StatelessWidget {
-  const WordSearchScreen({super.key});
+  final bool embedded;
+  const WordSearchScreen({super.key, this.embedded = false});
 
   @override
   Widget build(BuildContext context) {
