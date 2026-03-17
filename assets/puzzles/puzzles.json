@@ -6,6 +6,38 @@
     "difficulty": "easy",
     "time_limit_sec": 600,
     "chapter_id": 1,
+    "levels": [
+      {
+        "level": 1,
+        "type": "word_search",
+        "title": "Find the Hidden Words",
+        "instruction": "Find all words in order. First letters spell the code."
+      },
+      {
+        "level": 2,
+        "type": "color_cascade",
+        "title": "Color Cascade",
+        "instruction": "Clear groups of 3 or more matching colors to reveal the hidden code."
+      },
+      {
+        "level": 3,
+        "type": "interrogation",
+        "title": "Interrogation Room",
+        "instruction": "Answer all 5 questions correctly to get the code."
+      },
+      {
+        "level": 4,
+        "type": "memory_grid",
+        "title": "Memory Grid",
+        "instruction": "Memorize the sequence then repeat it exactly."
+      },
+      {
+        "level": 5,
+        "type": "decode_map",
+        "title": "Decode the Map",
+        "instruction": "Drag the map pieces into the correct order to reveal the exit."
+      }
+    ],
     "clues": [
       { "id": "c1", "text": "The curator's badge was found near the VAULT room." },
       { "id": "c2", "text": "Security footage shows someone in an ALARM-disabling uniform." },
@@ -35,6 +67,55 @@
         {"word":"ESCAPE","row":2,"col":1,"direction":"down"}
       ]
     },
+    "color_cascade": {
+      "grid_size": 6,
+      "colors": ["red","blue","green","yellow","purple"],
+      "moves_allowed": 20,
+      "code": "CC1"
+    },
+    "interrogation": {
+      "questions": [
+        {
+          "question": "Where was the curator's badge found?",
+          "options": ["East Wing", "Near the VAULT room", "In the office", "At the exit"],
+          "correct": 1
+        },
+        {
+          "question": "What was the suspect disabling?",
+          "options": ["Cameras", "Locks", "ALARM system", "Lights"],
+          "correct": 2
+        },
+        {
+          "question": "When did the unauthorized entry happen?",
+          "options": ["Midnight", "Noon", "Dawn", "Evening"],
+          "correct": 0
+        },
+        {
+          "question": "What are the curator's initials?",
+          "options": ["V.A.G", "V.A.G.L.E", "G.L.E", "V.G.E"],
+          "correct": 1
+        },
+        {
+          "question": "Why did the curator stage the theft?",
+          "options": ["For fame", "For insurance money", "For revenge", "For fun"],
+          "correct": 1
+        }
+      ],
+      "code": "IR1"
+    },
+    "memory_grid": {
+      "grid_size": 4,
+      "sequence_length": 5,
+      "sequence": [0, 3, 7, 12, 5],
+      "code": "MG1"
+    },
+    "decode_map": {
+      "pieces": 4,
+      "correct_order": [2, 0, 3, 1],
+      "piece_labels": ["East Wing", "Main Hall", "Exit Route", "Vault Room"],
+      "code": "DM1"
+    },
+    "final_passphrase": "VAGLE-CC1-IR1-MG1-DM1",
     "story_reveal": "The curator staged the theft for insurance money. The passphrase VAGLE was his initials — Victor A. Greene, Larceny Expert. Case closed.",
     "achievement": { "id": "ach_001", "name": "Museum Detective", "description": "Solved The Vanishing Curator" }
   },
@@ -45,6 +126,38 @@
     "difficulty": "hard",
     "time_limit_sec": 480,
     "chapter_id": 2,
+    "levels": [
+      {
+        "level": 1,
+        "type": "word_search",
+        "title": "Find the Hidden Words",
+        "instruction": "Find all words in order. First letters spell the code."
+      },
+      {
+        "level": 2,
+        "type": "color_cascade",
+        "title": "Color Cascade",
+        "instruction": "Clear groups of 3 or more matching colors to reveal the hidden code."
+      },
+      {
+        "level": 3,
+        "type": "interrogation",
+        "title": "Interrogation Room",
+        "instruction": "Answer all 5 questions correctly to get the code."
+      },
+      {
+        "level": 4,
+        "type": "memory_grid",
+        "title": "Memory Grid",
+        "instruction": "Memorize the sequence then repeat it exactly."
+      },
+      {
+        "level": 5,
+        "type": "decode_map",
+        "title": "Decode the Map",
+        "instruction": "Drag the map pieces into the correct order to reveal the exit."
+      }
+    ],
     "clues": [
       { "id": "c4", "text": "The manifesto mentions a SHADOW organization." },
       { "id": "c5", "text": "They meet at MIDNIGHT in the old clock tower." },
@@ -80,7 +193,61 @@
         {"word":"CIPHER","row":8,"col":0,"direction":"right"}
       ]
     },
-    "story_reveal": "The society was a book club that enjoyed mystery novels. The SMRKCC passphrase stood for their meeting room: Sub basement Meeting Room, Knitting Circle Corner. Mystery solved.",
+    "color_cascade": {
+      "grid_size": 6,
+      "colors": ["red","blue","green","yellow","purple"],
+      "moves_allowed": 15,
+      "code": "CC2"
+    },
+    "interrogation": {
+      "questions": [
+        {
+          "question": "What organization is mentioned in the manifesto?",
+          "options": ["RAVEN", "SHADOW", "CIPHER", "MIDNIGHT"],
+          "correct": 1
+        },
+        {
+          "question": "Where does the society meet?",
+          "options": ["Library basement", "Old clock tower", "City hall", "Museum"],
+          "correct": 1
+        },
+        {
+          "question": "What does their symbol show?",
+          "options": ["A wolf", "A snake", "A RAVEN holding a KEY", "A dragon"],
+          "correct": 2
+        },
+        {
+          "question": "What does SMRKCC stand for?",
+          "options": [
+            "Secret Meeting Room Key Code Cipher",
+            "Sub-basement Meeting Room Knitting Circle Corner",
+            "Shadow Members Reach Key Code Cipher",
+            "Society Manifesto Raven Key Code Corner"
+          ],
+          "correct": 1
+        },
+        {
+          "question": "What was the society actually doing?",
+          "options": ["Planning a heist", "Running a spy ring", "Enjoying mystery novels", "Hiding treasure"],
+          "correct": 2
+        }
+      ],
+      "code": "IR2"
+    },
+    "memory_grid": {
+      "grid_size": 4,
+      "sequence_length": 6,
+      "sequence": [1, 5, 9, 2, 14, 8],
+      "code": "MG2"
+    },
+    "decode_map": {
+      "pieces": 4,
+      "correct_order": [1, 3, 0, 2],
+      "piece_labels": ["Clock Tower", "Library Exit", "Secret Room", "Underground Path"],
+      "code": "DM2"
+    },
+    "final_passphrase": "SMRKCC-CC2-IR2-MG2-DM2",
+    "story_reveal": "The society was a book club that enjoyed mystery novels. The SMRKCC passphrase stood for their meeting room: Sub-basement Meeting Room, Knitting Circle Corner. Mystery solved.",
     "achievement": { "id": "ach_002", "name": "Night Owl", "description": "Solved The Midnight Cipher" }
   }
 ]
