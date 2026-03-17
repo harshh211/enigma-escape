@@ -43,6 +43,16 @@ class GameProvider extends ChangeNotifier {
   bool _wordSearchComplete = false;
   String? _passphrase;
 
+  // Level progression 
+  int _currentLevel = 1;
+  List<String> _completedLevelCodes = [];
+  bool _levelComplete = false;
+
+  int get currentLevel => _currentLevel;
+  List<String> get completedLevelCodes => List.unmodifiable(_completedLevelCodes);
+  bool get levelComplete => _levelComplete;
+  int get totalLevels => _activePuzzle?.levels.length ?? 5;
+
   List<GridCell> get selectedCells => List.unmodifiable(_selectedCells);
   Set<String> get foundWords => Set.unmodifiable(_foundWords);
   List<String> get foundWordsInOrder => List.unmodifiable(_foundWordsInOrder);
@@ -109,6 +119,9 @@ class GameProvider extends ChangeNotifier {
     _foundWordsInOrder = [];
     _wordSearchComplete = false;
     _passphrase = null;
+    _currentLevel = 1;
+    _completedLevelCodes = [];
+    _levelComplete = false;
     _sessionComplete = false;
     _timedOut = false;
     _showHint = false;
@@ -303,7 +316,21 @@ class GameProvider extends ChangeNotifier {
     _achievements = await DatabaseHelper.instance.getAllAchievements();
     notifyListeners();
   }
+ 
+  void completeLevel(String code) {
+    _completedLevelCodes = [..._completedLevelCodes, code];
+    _levelComplete = true;
+    notifyListeners();
+  }
 
+  void goToNextLevel() {
+    if (_currentLevel < totalLevels) {
+      _currentLevel++;
+      _levelComplete = false;
+      notifyListeners();
+    }
+  }
+  
   @override
   void dispose() {
     _timer?.cancel();
