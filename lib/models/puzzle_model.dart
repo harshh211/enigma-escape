@@ -1,5 +1,3 @@
-// lib/models/puzzle_model.dart
-
 class Clue {
   final String id;
   final String text;
@@ -16,6 +14,46 @@ class Clue {
         text: text,
         isFound: isFound ?? this.isFound,
         foundAt: foundAt ?? this.foundAt,
+      );
+}
+
+class PuzzleLevel {
+  final int level;
+  final String type;
+  final String title;
+  final String instruction;
+
+  PuzzleLevel({
+    required this.level,
+    required this.type,
+    required this.title,
+    required this.instruction,
+  });
+
+  factory PuzzleLevel.fromJson(Map<String, dynamic> j) => PuzzleLevel(
+        level: j['level'] as int,
+        type: j['type'] as String,
+        title: j['title'] as String,
+        instruction: j['instruction'] as String,
+      );
+}
+
+class InterrogationQuestion {
+  final String question;
+  final List<String> options;
+  final int correct;
+
+  InterrogationQuestion({
+    required this.question,
+    required this.options,
+    required this.correct,
+  });
+
+  factory InterrogationQuestion.fromJson(Map<String, dynamic> j) =>
+      InterrogationQuestion(
+        question: j['question'] as String,
+        options: List<String>.from(j['options'] as List),
+        correct: j['correct'] as int,
       );
 }
 
@@ -73,6 +111,83 @@ class WordSearchPuzzle {
   }
 }
 
+class ColorCascadeData {
+  final int gridSize;
+  final List<String> colors;
+  final int movesAllowed;
+  final String code;
+
+  ColorCascadeData({
+    required this.gridSize,
+    required this.colors,
+    required this.movesAllowed,
+    required this.code,
+  });
+
+  factory ColorCascadeData.fromJson(Map<String, dynamic> j) => ColorCascadeData(
+        gridSize: j['grid_size'] as int,
+        colors: List<String>.from(j['colors'] as List),
+        movesAllowed: j['moves_allowed'] as int,
+        code: j['code'] as String,
+      );
+}
+
+class InterrogationData {
+  final List<InterrogationQuestion> questions;
+  final String code;
+
+  InterrogationData({required this.questions, required this.code});
+
+  factory InterrogationData.fromJson(Map<String, dynamic> j) => InterrogationData(
+        questions: (j['questions'] as List<dynamic>)
+            .map((q) => InterrogationQuestion.fromJson(q as Map<String, dynamic>))
+            .toList(),
+        code: j['code'] as String,
+      );
+}
+
+class MemoryGridData {
+  final int gridSize;
+  final int sequenceLength;
+  final List<int> sequence;
+  final String code;
+
+  MemoryGridData({
+    required this.gridSize,
+    required this.sequenceLength,
+    required this.sequence,
+    required this.code,
+  });
+
+  factory MemoryGridData.fromJson(Map<String, dynamic> j) => MemoryGridData(
+        gridSize: j['grid_size'] as int,
+        sequenceLength: j['sequence_length'] as int,
+        sequence: List<int>.from(j['sequence'] as List),
+        code: j['code'] as String,
+      );
+}
+
+class DecodeMapData {
+  final int pieces;
+  final List<int> correctOrder;
+  final List<String> pieceLabels;
+  final String code;
+
+  DecodeMapData({
+    required this.pieces,
+    required this.correctOrder,
+    required this.pieceLabels,
+    required this.code,
+  });
+
+  factory DecodeMapData.fromJson(Map<String, dynamic> j) => DecodeMapData(
+        pieces: j['pieces'] as int,
+        correctOrder: List<int>.from(j['correct_order'] as List),
+        pieceLabels: List<String>.from(j['piece_labels'] as List),
+        code: j['code'] as String,
+      );
+}
+
 class Achievement {
   final String id;
   final String name;
@@ -107,8 +222,14 @@ class Puzzle {
   final String difficulty;
   final int timeLimitSec;
   final int chapterId;
+  final List<PuzzleLevel> levels;
   final List<Clue> clues;
   final WordSearchPuzzle wordsearch;
+  final ColorCascadeData colorCascade;
+  final InterrogationData interrogation;
+  final MemoryGridData memoryGrid;
+  final DecodeMapData decodeMap;
+  final String finalPassphrase;
   final String storyReveal;
   final Achievement achievement;
 
@@ -119,8 +240,14 @@ class Puzzle {
     required this.difficulty,
     required this.timeLimitSec,
     required this.chapterId,
+    required this.levels,
     required this.clues,
     required this.wordsearch,
+    required this.colorCascade,
+    required this.interrogation,
+    required this.memoryGrid,
+    required this.decodeMap,
+    required this.finalPassphrase,
     required this.storyReveal,
     required this.achievement,
   });
@@ -132,10 +259,18 @@ class Puzzle {
         difficulty: j['difficulty'] as String,
         timeLimitSec: j['time_limit_sec'] as int,
         chapterId: j['chapter_id'] as int,
+        levels: (j['levels'] as List<dynamic>)
+            .map((l) => PuzzleLevel.fromJson(l as Map<String, dynamic>))
+            .toList(),
         clues: (j['clues'] as List<dynamic>)
             .map((c) => Clue.fromJson(c as Map<String, dynamic>))
             .toList(),
         wordsearch: WordSearchPuzzle.fromJson(j['wordsearch'] as Map<String, dynamic>),
+        colorCascade: ColorCascadeData.fromJson(j['color_cascade'] as Map<String, dynamic>),
+        interrogation: InterrogationData.fromJson(j['interrogation'] as Map<String, dynamic>),
+        memoryGrid: MemoryGridData.fromJson(j['memory_grid'] as Map<String, dynamic>),
+        decodeMap: DecodeMapData.fromJson(j['decode_map'] as Map<String, dynamic>),
+        finalPassphrase: j['final_passphrase'] as String,
         storyReveal: j['story_reveal'] as String,
         achievement: Achievement.fromJson(j['achievement'] as Map<String, dynamic>),
       );
