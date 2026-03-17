@@ -128,6 +128,17 @@ class _ColorCascadeScreenState extends State<ColorCascadeScreen> {
     return true;
   }
 
+  bool _isStuck() {
+    for (int r = 0; r < _gridSize; r++) {
+      for (int c = 0; c < _gridSize; c++) {
+        if (_grid[r][c] != null && _findGroup(r, c).length >= 3) {
+          return false;
+        }
+      }
+    }
+    return _countRemaining() > 0;
+  }
+
   int _countRemaining() {
     int count = 0;
     for (final row in _grid) {
@@ -225,7 +236,7 @@ class _ColorCascadeScreenState extends State<ColorCascadeScreen> {
           ),
 
           // Out of moves
-          if (_movesLeft <= 0 && !_won)
+          if ((_movesLeft <= 0 || _isStuck()) && !_won)
             Container(
               width: double.infinity,
               color: AppColors.error.withOpacity(0.15),
@@ -244,7 +255,7 @@ class _ColorCascadeScreenState extends State<ColorCascadeScreen> {
                   }),
                   style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.error),
-                  child: const Text('TRY AGAIN'),
+                  child: const Text('SHUFFLE & TRY AGAIN'),
                 ),
               ]),
             ),
