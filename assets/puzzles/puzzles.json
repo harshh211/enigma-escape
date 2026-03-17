@@ -1,0 +1,86 @@
+[
+  {
+    "id": "puzzle_001",
+    "title": "The Vanishing Curator",
+    "description": "A priceless artifact has gone missing from the city museum. The curator was last seen in the east wing. Your team must decode the hidden message before the thief escapes.",
+    "difficulty": "easy",
+    "time_limit_sec": 600,
+    "chapter_id": 1,
+    "clues": [
+      { "id": "c1", "text": "The curator's badge was found near the VAULT room." },
+      { "id": "c2", "text": "Security footage shows someone in an ALARM-disabling uniform." },
+      { "id": "c3", "text": "A GUARD log shows an unauthorized entry at midnight." }
+    ],
+    "wordsearch": {
+      "id": "ws_001",
+      "grid_size": 8,
+      "grid": [
+        ["V","A","U","L","T","X","P","A"],
+        ["G","U","A","R","D","Q","Z","L"],
+        ["B","E","W","F","K","J","N","A"],
+        ["H","S","T","L","Y","C","V","R"],
+        ["I","C","M","P","A","O","X","M"],
+        ["K","A","E","Q","R","S","U","W"],
+        ["N","P","F","T","Z","G","E","J"],
+        ["D","E","Y","B","H","I","W","R"]
+      ],
+      "words": ["VAULT","ALARM","GUARD","LASER","ESCAPE"],
+      "correct_sequence": ["VAULT","ALARM","GUARD","LASER","ESCAPE"],
+      "passphrase": "VAGLE",
+      "hint_starts": [
+        {"word":"VAULT","row":0,"col":0,"direction":"right"},
+        {"word":"ALARM","row":0,"col":7,"direction":"down"},
+        {"word":"GUARD","row":1,"col":0,"direction":"right"},
+        {"word":"LASER","row":3,"col":3,"direction":"diagonal"},
+        {"word":"ESCAPE","row":2,"col":1,"direction":"down"}
+      ]
+    },
+    "story_reveal": "The curator staged the theft for insurance money. The passphrase VAGLE was his initials — Victor A. Greene, Larceny Expert. Case closed.",
+    "achievement": { "id": "ach_001", "name": "Museum Detective", "description": "Solved The Vanishing Curator" }
+  },
+  {
+    "id": "puzzle_002",
+    "title": "The Midnight Cipher",
+    "description": "A secret society has hidden their manifesto inside a city library. The librarian left cryptic notes. Decode their hidden words before sunrise.",
+    "difficulty": "hard",
+    "time_limit_sec": 480,
+    "chapter_id": 2,
+    "clues": [
+      { "id": "c4", "text": "The manifesto mentions a SHADOW organization." },
+      { "id": "c5", "text": "They meet at MIDNIGHT in the old clock tower." },
+      { "id": "c6", "text": "Their symbol is a RAVEN holding a KEY." },
+      { "id": "c7", "text": "The exit CODE is hidden in plain sight." }
+    ],
+    "wordsearch": {
+      "id": "ws_002",
+      "grid_size": 12,
+      "grid": [
+        ["S","H","A","D","O","W","X","P","Q","Z","A","M"],
+        ["B","F","G","J","K","L","N","Q","R","T","U","I"],
+        ["C","D","E","G","H","I","J","K","L","M","N","D"],
+        ["O","P","Q","R","S","T","U","V","W","X","Y","N"],
+        ["Z","A","B","C","C","O","D","E","F","G","H","I"],
+        ["J","K","L","M","N","O","P","Q","R","S","T","G"],
+        ["K","E","Y","N","O","P","Q","R","S","T","U","H"],
+        ["N","V","W","X","Y","Z","C","I","P","H","E","T"],
+        ["C","I","P","H","E","R","F","G","H","I","J","K"],
+        ["L","W","X","Y","Z","A","B","C","D","E","F","G"],
+        ["M","N","O","P","Q","R","S","T","U","V","W","X"],
+        ["R","A","V","E","N","Y","Z","A","B","C","D","E"]
+      ],
+      "words": ["SHADOW","MIDNIGHT","RAVEN","KEY","CODE","CIPHER"],
+      "correct_sequence": ["SHADOW","MIDNIGHT","RAVEN","KEY","CODE","CIPHER"],
+      "passphrase": "SMRKCC",
+      "hint_starts": [
+        {"word":"SHADOW","row":0,"col":0,"direction":"right"},
+        {"word":"MIDNIGHT","row":0,"col":11,"direction":"down"},
+        {"word":"RAVEN","row":11,"col":0,"direction":"right"},
+        {"word":"KEY","row":6,"col":0,"direction":"right"},
+        {"word":"CODE","row":4,"col":4,"direction":"right"},
+        {"word":"CIPHER","row":8,"col":0,"direction":"right"}
+      ]
+    },
+    "story_reveal": "The society was a book club that enjoyed mystery novels. The SMRKCC passphrase stood for their meeting room: Sub basement Meeting Room, Knitting Circle Corner. Mystery solved.",
+    "achievement": { "id": "ach_002", "name": "Night Owl", "description": "Solved The Midnight Cipher" }
+  }
+]
