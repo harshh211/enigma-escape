@@ -227,7 +227,8 @@ class GameProvider extends ChangeNotifier {
         _wordSearchComplete = true;
         _selectedCells = [];
         notifyListeners();
-        await _endSession(won: true);
+        // Complete level 1 and move to level 2
+        completeLevel(_passphrase!);
         return;
       }
     } else {
@@ -330,7 +331,7 @@ class GameProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-  
+
   @override
   void dispose() {
     _timer?.cancel();
