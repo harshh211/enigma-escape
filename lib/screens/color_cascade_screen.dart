@@ -120,12 +120,10 @@ class _ColorCascadeScreenState extends State<ColorCascadeScreen> {
   }
 
   bool _checkWin() {
-    for (final row in _grid) {
-      for (final cell in row) {
-        if (cell != null) return false;
-      }
-    }
-    return true;
+    final total = _gridSize * _gridSize;
+    final remaining = _countRemaining();
+    // Win when 70% of board is cleared
+    return remaining <= (total * 0.3).floor();
   }
 
   bool _isStuck() {
