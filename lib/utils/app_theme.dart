@@ -1,5 +1,3 @@
-// lib/utils/app_theme.dart
-
 import 'package:flutter/material.dart';
 
 class AppColors {
@@ -41,7 +39,7 @@ class AppTheme {
           unselectedItemColor: AppColors.textSecondary,
           type: BottomNavigationBarType.fixed,
         ),
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           color: AppColors.surfaceLight,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           elevation: 0,
