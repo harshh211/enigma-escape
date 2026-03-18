@@ -4,6 +4,7 @@ import '../providers/game_provider.dart';
 import '../utils/app_theme.dart';
 import '../utils/word_search_solver.dart';
 import '../widgets/hint_overlay.dart';
+import '../widgets/timer_widget.dart';
 
 class WordSearchScreen extends StatelessWidget {
   final bool embedded;
@@ -46,6 +47,7 @@ class WordSearchScreen extends StatelessWidget {
           ),
           body: Column(
             children: [
+              const LevelTimerBar(),
               // Instruction bar
               Container(
                 width: double.infinity,
