@@ -12,6 +12,7 @@ import 'screens/clue_tracker_screen.dart';
 import 'screens/achievements_screen.dart';
 import 'screens/leaderboard_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/final_code_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,6 +48,7 @@ class EnigmaRoomsApp extends StatelessWidget {
             '/achievements': (_) => const AchievementsScreen(),
             '/leaderboard':  (_) => const LeaderboardScreen(),
             '/settings':     (_) => const SettingsScreen(),
+            '/final':        (_) => const FinalCodeScreen(),
           },
         ),
       ),

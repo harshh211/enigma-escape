@@ -115,15 +115,15 @@ class _LevelCompleteBanner extends StatelessWidget {
                   ),
                 const SizedBox(height: 32),
                 if (isLastLevel) ...[
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () => Navigator.pushNamedAndRemoveUntil(
-                          context, '/', (_) => false),
-                      icon: const Icon(Icons.emoji_events),
-                      label: const Text('SEE FINAL RESULTS'),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => Navigator.pushNamedAndRemoveUntil(
+                            context, '/final', (_) => false),
+                        icon: const Icon(Icons.key),
+                        label: const Text('ENTER THE FINAL CODES'),
+                      ),
                     ),
-                  ),
                 ] else ...[
                   SizedBox(
                     width: double.infinity,
