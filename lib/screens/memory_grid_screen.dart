@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
 import '../utils/app_theme.dart';
+import '../widgets/timer_widget.dart';
 
 enum MemoryPhase { memorize, recall, lost }
 
@@ -183,6 +184,7 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
       ),
       body: Column(
         children: [
+          const LevelTimerBar(),
           // Phase banner
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
 import '../utils/app_theme.dart';
+import '../widgets/timer_widget.dart';
 
 class InterrogationScreen extends StatefulWidget {
   const InterrogationScreen({super.key});
@@ -40,6 +41,7 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
       ),
       body: Column(
         children: [
+          const LevelTimerBar(),
           // Progress bar
           Container(
             color: AppColors.surface,

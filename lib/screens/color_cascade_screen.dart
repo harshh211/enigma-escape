@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
 import '../utils/app_theme.dart';
+import '../widgets/timer_widget.dart';
 
 class ColorCascadeScreen extends StatefulWidget {
   const ColorCascadeScreen({super.key});
@@ -85,6 +86,7 @@ class _ColorCascadeScreenState extends State<ColorCascadeScreen> {
       ),
       body: Column(
         children: [
+          const LevelTimerBar(),
           // Instruction bar
           Container(
             width: double.infinity,
