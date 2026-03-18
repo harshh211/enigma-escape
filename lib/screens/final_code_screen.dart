@@ -62,6 +62,10 @@ class _FinalCodeScreenState extends State<FinalCodeScreen> {
     final elapsed = session?.elapsedFormatted ?? '--';
     final hints = session?.hintsUsed ?? 0;
     final mistakes = session?.wrongHighlights ?? 0;
+    // Force save latest stats before showing
+    if (session != null) {
+      session.endTime ??= DateTime.now();
+    }
 
     showDialog(
       context: context,

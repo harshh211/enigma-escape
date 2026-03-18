@@ -37,6 +37,8 @@ class GameProvider extends ChangeNotifier {
   bool get sessionComplete => _sessionComplete;
   bool get timedOut => _timedOut;
   int get cluesFound => _clues.where((c) => c.isFound).length;
+  int get totalHintsUsed => _activeSession?.hintsUsed ?? 0;
+  int get totalMistakes => _activeSession?.wrongHighlights ?? 0;
 
   // Word Search state
   List<GridCell> _selectedCells = [];
