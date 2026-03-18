@@ -222,12 +222,11 @@ class GameProvider extends ChangeNotifier {
 
       if (_foundWordsInOrder.length ==
           _activePuzzle!.wordsearch.correctSequence.length) {
-        _passphrase =
-            WordSearchSolver.buildPassphrase(_foundWordsInOrder);
+        
+        _passphrase = _activePuzzle!.wordsearch.passphrase;
         _wordSearchComplete = true;
         _selectedCells = [];
         notifyListeners();
-        // Complete level 1 and move to level 2
         completeLevel(_passphrase!);
         return;
       }
