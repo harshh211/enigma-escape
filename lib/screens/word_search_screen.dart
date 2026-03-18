@@ -139,6 +139,7 @@ class WordSearchScreen extends StatelessWidget {
   }
 
   void _showHintPassage(BuildContext context, List<String> words) {
+    context.read<GameProvider>().activeSession?.hintsUsed++;
     final passage =
         context.read<GameProvider>().activePuzzle!.description;
 

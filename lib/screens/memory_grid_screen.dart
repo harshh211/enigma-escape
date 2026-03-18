@@ -68,6 +68,7 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
   }
 
   void _showHint() {
+    context.read<GameProvider>().activeSession?.hintsUsed++;
     setState(() {
       _showingHint = true;
       _phase = MemoryPhase.memorize;
@@ -112,6 +113,7 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
 
     if (newSeq[step] != _sequence[step]) {
       _attempts++;
+      context.read<GameProvider>().activeSession?.wrongHighlights++;
       if (_attempts >= _maxAttempts) {
         setState(() => _phase = MemoryPhase.lost);
         Future.delayed(const Duration(milliseconds: 300), _showLostDialog);
