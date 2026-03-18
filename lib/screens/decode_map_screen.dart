@@ -12,50 +12,49 @@ class DecodeMapScreen extends StatefulWidget {
 
 class _DecodeMapScreenState extends State<DecodeMapScreen> {
   
-  final List<int> _dials = [0, 0, 0, 0];
-  late List<int> _correctCombination;
+  late List<String> _shuffledCodes;
+  late List<int> _correctAnswers; 
+  final List<int?> _selectedLevels = [null, null, null, null];
   bool _checked = false;
   bool _won = false;
   int _attempts = 0;
 
+  
+  final List<Map<String, dynamic>> _codeInfo = [
+    {'code': 'VAGLE', 'level': 1},
+    {'code': 'CC1',   'level': 2},
+    {'code': 'MG1',   'level': 4},
+    {'code': 'IR1',   'level': 3},
+  ];
+
   @override
   void initState() {
     super.initState();
-    
-    _correctCombination =
-        context.read<GameProvider>().activePuzzle!.decodeMap.correctOrder;
+    // Shuffle the display order
+    _shuffledCodes = _codeInfo.map((c) => c['code'] as String).toList();
+    _shuffledCodes.shuffle();
+    _correctAnswers = _shuffledCodes
+        .map((code) => _codeInfo
+            .firstWhere((c) => c['code'] == code)['level'] as int)
+        .toList();
   }
 
-  void _increment(int dialIndex) {
-    setState(() {
-      _dials[dialIndex] = (_dials[dialIndex] + 1) % 10;
-      _checked = false;
-    });
-  }
-
-  void _decrement(int dialIndex) {
-    setState(() {
-      _dials[dialIndex] = (_dials[dialIndex] - 1 + 10) % 10;
-      _checked = false;
-    });
-  }
-
-  void _checkCombination() {
-    bool correct = true;
-    for (int i = 0; i < _correctCombination.length; i++) {
-      if (_dials[i] != _correctCombination[i]) {
-        correct = false;
+  void _checkAnswers() {
+    bool allCorrect = true;
+    for (int i = 0; i < _correctAnswers.length; i++) {
+      if (_selectedLevels[i] != _correctAnswers[i]) {
+        allCorrect = false;
         break;
       }
     }
 
     setState(() {
       _checked = true;
-      _won = correct;
-      if (!correct) _attempts++;
+      _won = allCorrect;
+      if (!allCorrect) _attempts++;
     });
 
-    if (correct) {
+    if (allCorrect) {
       Future.delayed(const Duration(milliseconds: 600), () {
         final code =
             context.read<GameProvider>().activePuzzle!.decodeMap.code;
@@ -66,179 +65,219 @@ class _DecodeMapScreenState extends State<DecodeMapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final game = context.watch<GameProvider>();
+    final allSelected = _selectedLevels.every((l) => l != null);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('LEVEL 5 — CRACK THE LOCK'),
         automaticallyImplyLeading: false,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: TimerBadge(seconds: game.timeRemaining),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Instruction
-            Container(
-              width: double.infinity,
-              color: AppColors.surface,
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  const Text(
-                    'Set the correct combination to crack the lock.',
-                    style: TextStyle(
-                        color: AppColors.textSecondary, fontSize: 13),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Use the codes you collected from all previous levels.',
-                    style: TextStyle(
-                        color: AppColors.textSecondary, fontSize: 12),
-                    textAlign: TextAlign.center,
-                  ),
-                  if (_checked && !_won) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      '✗ Wrong combination — attempts: $_attempts',
-                      style: const TextStyle(
-                          color: AppColors.error,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                  if (_checked && _won) ...[
-                    const SizedBox(height: 8),
-                    const Text(
-                      '✓ Lock cracked! Well done!',
-                      style: TextStyle(
-                          color: AppColors.success,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 40),
-
-            // Lock image
-            Container(
-              width: 140,
-              height: 140,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.surfaceLight,
-                border: Border.all(
-                  color: _won
-                      ? AppColors.success
-                      : _checked
-                          ? AppColors.error
-                          : AppColors.primary.withOpacity(0.4),
-                  width: 3,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: (_won ? AppColors.success : AppColors.primary)
-                        .withOpacity(0.2),
-                    blurRadius: 20,
-                    spreadRadius: 4,
-                  ),
-                ],
-              ),
-              child: Icon(
-                _won ? Icons.lock_open : Icons.lock,
-                color: _won ? AppColors.success : AppColors.primary,
-                size: 72,
-              ),
-            ),
-
-            const SizedBox(height: 40),
-
-            // Dials
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(
-                  _dials.length,
-                  (i) => _Dial(
-                    value: _dials[i],
-                    onUp: () => _increment(i),
-                    onDown: () => _decrement(i),
-                    isCorrect: _won ? true : null,
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 40),
-
-            // Codes collected
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+            // Lock icon
+            Center(
               child: Container(
-                width: double.infinity,
+                width: 90,
+                height: 90,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.primary.withOpacity(0.12),
+                  border: Border.all(
+                      color: _won
+                          ? AppColors.success
+                          : AppColors.primary.withOpacity(0.4),
+                      width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: (_won ? AppColors.success : AppColors.primary)
+                          .withOpacity(0.2),
+                      blurRadius: 20,
+                      spreadRadius: 4,
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  _won ? Icons.lock_open : Icons.lock,
+                  color: _won ? AppColors.success : AppColors.primary,
+                  size: 46,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            const Center(
+              child: Text('CRACK THE LOCK',
+                  style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1)),
+            ),
+            const SizedBox(height: 6),
+            const Center(
+              child: Text(
+                'On which level did you find each code?',
+                style: TextStyle(
+                    color: AppColors.textSecondary, fontSize: 13),
+                textAlign: TextAlign.center,
+              ),
+            ),
+
+            if (_checked && !_won) ...[
+              const SizedBox(height: 8),
+              const Center(
+                child: Text('Wrong! Try again.',
+                    style: TextStyle(
+                        color: AppColors.error,
+                        fontWeight: FontWeight.bold)),
+              ),
+            ],
+            if (_checked && _won) ...[
+              const SizedBox(height: 8),
+              const Center(
+                child: Text('✓ Lock cracked!',
+                    style: TextStyle(
+                        color: AppColors.success,
+                        fontWeight: FontWeight.bold)),
+              ),
+            ],
+
+            const SizedBox(height: 28),
+
+            // Code questions
+            ...List.generate(_shuffledCodes.length, (i) {
+              final code = _shuffledCodes[i];
+              final selected = _selectedLevels[i];
+              final isCorrect = _checked && selected == _correctAnswers[i];
+              final isWrong = _checked && selected != _correctAnswers[i];
+
+              return Container(
+                margin: const EdgeInsets.only(bottom: 16),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: AppColors.surfaceLight,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: isCorrect
+                        ? AppColors.success.withOpacity(0.6)
+                        : isWrong
+                            ? AppColors.error.withOpacity(0.6)
+                            : AppColors.primary.withOpacity(0.2),
+                  ),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('CODES COLLECTED',
-                        style: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 10,
-                            letterSpacing: 1.5,
-                            fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 10),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: context
-                          .read<GameProvider>()
-                          .completedLevelCodes
-                          .map((c) => Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 14, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color:
-                                      AppColors.primary.withOpacity(0.12),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                      color: AppColors.primary
-                                          .withOpacity(0.4)),
-                                ),
-                                child: Text(c,
-                                    style: const TextStyle(
-                                        color: AppColors.primary,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 13,
-                                        letterSpacing: 2)),
-                              ))
-                          .toList(),
+                    Row(children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                              color: AppColors.primary.withOpacity(0.4)),
+                        ),
+                        child: Text(code,
+                            style: const TextStyle(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                letterSpacing: 2)),
+                      ),
+                      const SizedBox(width: 10),
+                      const Text('was found on level:',
+                          style: TextStyle(
+                              color: AppColors.textSecondary,
+                              fontSize: 13)),
+                      const Spacer(),
+                      if (isCorrect)
+                        const Icon(Icons.check_circle,
+                            color: AppColors.success, size: 20),
+                      if (isWrong)
+                        const Icon(Icons.cancel,
+                            color: AppColors.error, size: 20),
+                    ]),
+                    const SizedBox(height: 12),
+                    // Level selector buttons 1-4
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: List.generate(4, (lvl) {
+                        final levelNum = lvl + 1;
+                        final isSelected = selected == levelNum;
+                        return GestureDetector(
+                          onTap: _checked && _won
+                              ? null
+                              : () => setState(() {
+                                    _selectedLevels[i] = levelNum;
+                                    _checked = false;
+                                  }),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? AppColors.primary.withOpacity(0.2)
+                                  : AppColors.background,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: isSelected
+                                    ? AppColors.primary
+                                    : AppColors.surfaceLight,
+                                width: isSelected ? 2 : 1,
+                              ),
+                            ),
+                            child: Center(
+                              child: Text(
+                                '$levelNum',
+                                style: TextStyle(
+                                    color: isSelected
+                                        ? AppColors.primary
+                                        : AppColors.textSecondary,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
                     ),
                   ],
                 ),
+              );
+            }),
+
+            const SizedBox(height: 8),
+            if (_attempts > 0)
+              Center(
+                child: Text('Attempts: $_attempts',
+                    style: const TextStyle(
+                        color: AppColors.textSecondary, fontSize: 12)),
               ),
-            ),
+            const SizedBox(height: 16),
 
-            const SizedBox(height: 24),
-
-            // Check button
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
-              child: SizedBox(
-                width: double.infinity,
-                height: 54,
-                child: ElevatedButton.icon(
-                  onPressed: _won ? null : _checkCombination,
-                  icon: const Icon(Icons.lock_open),
-                  label: const Text('CRACK THE LOCK',
-                      style:
-                          TextStyle(fontSize: 16, letterSpacing: 1)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        _won ? AppColors.success : AppColors.primary,
-                  ),
+            SizedBox(
+              width: double.infinity,
+              height: 54,
+              child: ElevatedButton.icon(
+                onPressed: !allSelected || _won ? null : _checkAnswers,
+                icon: const Icon(Icons.lock_open),
+                label: const Text('CRACK THE LOCK',
+                    style: TextStyle(fontSize: 16, letterSpacing: 1)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      _won ? AppColors.success : AppColors.primary,
                 ),
               ),
             ),
@@ -249,88 +288,39 @@ class _DecodeMapScreenState extends State<DecodeMapScreen> {
   }
 }
 
-// Single dial widget
-class _Dial extends StatelessWidget {
-  final int value;
-  final VoidCallback onUp;
-  final VoidCallback onDown;
-  final bool? isCorrect;
-
-  const _Dial({
-    required this.value,
-    required this.onUp,
-    required this.onDown,
-    this.isCorrect,
-  });
+// Small timer badge for appbar
+class TimerBadge extends StatelessWidget {
+  final int seconds;
+  const TimerBadge({super.key, required this.seconds});
 
   @override
-  Widget build(BuildContext context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Up arrow
-          GestureDetector(
-            onTap: onUp,
-            child: Container(
-              width: 56,
-              height: 40,
-              decoration: BoxDecoration(
-                color: AppColors.surfaceLight,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  topRight: Radius.circular(10),
-                ),
-              ),
-              child: const Icon(Icons.keyboard_arrow_up,
-                  color: AppColors.primary, size: 28),
-            ),
-          ),
-          const SizedBox(height: 2),
-          // Number display
-          Container(
-            width: 56,
-            height: 64,
-            decoration: BoxDecoration(
-              color: isCorrect == true
-                  ? AppColors.success.withOpacity(0.2)
-                  : AppColors.surface,
-              border: Border.all(
-                color: isCorrect == true
-                    ? AppColors.success
-                    : AppColors.primary.withOpacity(0.5),
-                width: 2,
-              ),
-            ),
-            child: Center(
-              child: Text(
-                '$value',
-                style: TextStyle(
-                  color: isCorrect == true
-                      ? AppColors.success
-                      : AppColors.primary,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 2),
-          // Down arrow
-          GestureDetector(
-            onTap: onDown,
-            child: Container(
-              width: 56,
-              height: 40,
-              decoration: BoxDecoration(
-                color: AppColors.surfaceLight,
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(10),
-                  bottomRight: Radius.circular(10),
-                ),
-              ),
-              child: const Icon(Icons.keyboard_arrow_down,
-                  color: AppColors.primary, size: 28),
-            ),
-          ),
-        ],
-      );
+  Widget build(BuildContext context) {
+    final m = (seconds ~/ 60).toString().padLeft(2, '0');
+    final s = (seconds % 60).toString().padLeft(2, '0');
+    final isLow = seconds < 60;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: isLow
+            ? AppColors.error.withOpacity(0.2)
+            : AppColors.surfaceLight,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+            color: isLow
+                ? AppColors.error.withOpacity(0.5)
+                : Colors.transparent),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Icon(Icons.timer,
+            size: 13,
+            color: isLow ? AppColors.error : AppColors.textSecondary),
+        const SizedBox(width: 4),
+        Text('$m:$s',
+            style: TextStyle(
+                color: isLow ? AppColors.error : AppColors.textPrimary,
+                fontWeight: FontWeight.bold,
+                fontSize: 14)),
+      ]),
+    );
+  }
 }
