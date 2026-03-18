@@ -2,7 +2,7 @@
   {
     "id": "puzzle_001",
     "title": "The Vanishing Curator",
-    "description": "A priceless artifact has gone missing from the city museum. The curator was last seen in the east wing. Your team must decode the hidden message before the thief escapes.",
+    "description": "Late at night, the city museum received a distress call. A priceless golden artifact — the Eye of Horus — has vanished from the east wing. The security footage shows a figure in an ALARM-disabling uniform entering through the VAULT room at exactly midnight. A GUARD log confirms the unauthorized entry. Witnesses report seeing a red LASER tripwire being cut near the exhibit. The suspect managed to ESCAPE through the back corridor. Your team has been called in to decode the hidden message left behind and catch the culprit before they leave the city. Study this passage carefully — the answers to every question are hidden within it.",
     "difficulty": "easy",
     "time_limit_sec": 600,
     "chapter_id": 1,
@@ -11,13 +11,13 @@
         "level": 1,
         "type": "word_search",
         "title": "Find the Hidden Words",
-        "instruction": "Find all words in order. First letters spell the code."
+        "instruction": "Find all 5 words in order. First letters spell the code."
       },
       {
         "level": 2,
         "type": "color_cascade",
-        "title": "Color Cascade",
-        "instruction": "Clear groups of 3 or more matching colors to reveal the hidden code."
+        "title": "Wire Match",
+        "instruction": "Connect each color on the left to its match on the right."
       },
       {
         "level": 3,
@@ -29,13 +29,13 @@
         "level": 4,
         "type": "memory_grid",
         "title": "Memory Grid",
-        "instruction": "Memorize the sequence then repeat it exactly."
+        "instruction": "Memorize the highlighted blocks then tap them in order."
       },
       {
         "level": 5,
         "type": "decode_map",
-        "title": "Decode the Map",
-        "instruction": "Drag the map pieces into the correct order to reveal the exit."
+        "title": "Crack the Lock",
+        "instruction": "Enter the level numbers where you found each code in order."
       }
     ],
     "clues": [
@@ -69,36 +69,36 @@
     },
     "color_cascade": {
       "grid_size": 6,
-      "colors": ["red","blue","green","yellow","purple"],
+      "colors": ["red","blue","green","yellow"],
       "moves_allowed": 20,
       "code": "CC1"
     },
     "interrogation": {
       "questions": [
         {
-          "question": "Where was the curator's badge found?",
-          "options": ["East Wing", "Near the VAULT room", "In the office", "At the exit"],
-          "correct": 1
-        },
-        {
-          "question": "What was the suspect disabling?",
-          "options": ["Cameras", "Locks", "ALARM system", "Lights"],
+          "question": "Where was the Eye of Horus stolen from?",
+          "options": ["West wing", "North corridor", "East wing", "Basement vault"],
           "correct": 2
         },
         {
-          "question": "When did the unauthorized entry happen?",
-          "options": ["Midnight", "Noon", "Dawn", "Evening"],
-          "correct": 0
-        },
-        {
-          "question": "What are the curator's initials?",
-          "options": ["V.A.G", "V.A.G.L.E", "G.L.E", "V.G.E"],
+          "question": "What system did the suspect disable to enter?",
+          "options": ["Camera system", "ALARM system", "Lock system", "Guard system"],
           "correct": 1
         },
         {
-          "question": "Why did the curator stage the theft?",
-          "options": ["For fame", "For insurance money", "For revenge", "For fun"],
+          "question": "What time did the unauthorized entry happen?",
+          "options": ["12:00 PM (noon)", "12:00 AM (midnight)", "3:00 AM", "6:00 PM"],
           "correct": 1
+        },
+        {
+          "question": "What was the code you found in Level 1?",
+          "options": ["EAGLE", "VAGLE", "GLEVA", "AGVEL"],
+          "correct": 1
+        },
+        {
+          "question": "Which color was NOT present in Level 2?",
+          "options": ["Blue", "Red", "Orange", "Green"],
+          "correct": 2
         }
       ],
       "code": "IR1"
@@ -111,7 +111,7 @@
     },
     "decode_map": {
       "pieces": 4,
-      "correct_order": [2, 0, 3, 1],
+      "correct_order": [2, 1, 4, 3],
       "piece_labels": ["East Wing", "Main Hall", "Exit Route", "Vault Room"],
       "code": "DM1"
     },
@@ -122,7 +122,7 @@
   {
     "id": "puzzle_002",
     "title": "The Midnight Cipher",
-    "description": "A secret society has hidden their manifesto inside a city library. The librarian left cryptic notes. Decode their hidden words before sunrise.",
+    "description": "A secret society known only as SHADOW has been operating in the city library for months. They meet every night at MIDNIGHT in the old clock tower behind the reading room. Their symbol is a RAVEN holding a KEY — carved into the back of bookshelf seven. An anonymous tip revealed their exit CODE is hidden inside a copy of a mystery novel. The librarian found a note written in CIPHER left between the pages. Your team must decode their message before sunrise and expose the society. Every answer you need is hidden somewhere in this passage — read it carefully before proceeding.",
     "difficulty": "hard",
     "time_limit_sec": 480,
     "chapter_id": 2,
@@ -131,13 +131,13 @@
         "level": 1,
         "type": "word_search",
         "title": "Find the Hidden Words",
-        "instruction": "Find all words in order. First letters spell the code."
+        "instruction": "Find all 6 words in order. First letters spell the code."
       },
       {
         "level": 2,
         "type": "color_cascade",
-        "title": "Color Cascade",
-        "instruction": "Clear groups of 3 or more matching colors to reveal the hidden code."
+        "title": "Wire Match",
+        "instruction": "Connect each color on the left to its match on the right."
       },
       {
         "level": 3,
@@ -149,13 +149,13 @@
         "level": 4,
         "type": "memory_grid",
         "title": "Memory Grid",
-        "instruction": "Memorize the sequence then repeat it exactly."
+        "instruction": "Memorize the highlighted blocks then tap them in order."
       },
       {
         "level": 5,
         "type": "decode_map",
-        "title": "Decode the Map",
-        "instruction": "Drag the map pieces into the correct order to reveal the exit."
+        "title": "Crack the Lock",
+        "instruction": "Enter the level numbers where you found each code in order."
       }
     ],
     "clues": [
@@ -195,40 +195,35 @@
     },
     "color_cascade": {
       "grid_size": 6,
-      "colors": ["red","blue","green","yellow","purple"],
+      "colors": ["red","blue","green","yellow"],
       "moves_allowed": 15,
       "code": "CC2"
     },
     "interrogation": {
       "questions": [
         {
-          "question": "What organization is mentioned in the manifesto?",
+          "question": "What is the name of the secret society?",
           "options": ["RAVEN", "SHADOW", "CIPHER", "MIDNIGHT"],
           "correct": 1
         },
         {
-          "question": "Where does the society meet?",
+          "question": "Where does the society meet every night?",
           "options": ["Library basement", "Old clock tower", "City hall", "Museum"],
           "correct": 1
         },
         {
-          "question": "What does their symbol show?",
-          "options": ["A wolf", "A snake", "A RAVEN holding a KEY", "A dragon"],
-          "correct": 2
-        },
-        {
-          "question": "What does SMRKCC stand for?",
-          "options": [
-            "Secret Meeting Room Key Code Cipher",
-            "Sub-basement Meeting Room Knitting Circle Corner",
-            "Shadow Members Reach Key Code Cipher",
-            "Society Manifesto Raven Key Code Corner"
-          ],
+          "question": "What time do they meet?",
+          "options": ["12:00 PM (noon)", "12:00 AM (midnight)", "3:00 AM", "6:00 PM"],
           "correct": 1
         },
         {
-          "question": "What was the society actually doing?",
-          "options": ["Planning a heist", "Running a spy ring", "Enjoying mystery novels", "Hiding treasure"],
+          "question": "What was the code you found in Level 1?",
+          "options": ["SMRKCC", "CCMRKS", "KSMRCC", "MRKSCC"],
+          "correct": 0
+        },
+        {
+          "question": "Which color was NOT present in Level 2?",
+          "options": ["Blue", "Red", "Orange", "Green"],
           "correct": 2
         }
       ],
@@ -242,7 +237,7 @@
     },
     "decode_map": {
       "pieces": 4,
-      "correct_order": [1, 3, 0, 2],
+      "correct_order": [2, 1, 4, 3],
       "piece_labels": ["Clock Tower", "Library Exit", "Secret Room", "Underground Path"],
       "code": "DM2"
     },
