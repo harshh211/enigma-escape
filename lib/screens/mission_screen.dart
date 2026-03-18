@@ -16,7 +16,7 @@ class MissionScreen extends StatelessWidget {
       return Scaffold(
         appBar: AppBar(title: const Text('MISSION')),
         body: const Center(
-          child: Text('No active mission. Return home and start one.',
+          child: Text('No active mission.',
               style: TextStyle(color: AppColors.textSecondary)),
         ),
       );
@@ -28,32 +28,16 @@ class MissionScreen extends StatelessWidget {
       children: [
         Scaffold(
           appBar: AppBar(
-            title: Text(game.activePuzzle!.title,
-                overflow: TextOverflow.ellipsis),
+            title: const Text('MISSION BRIEFING'),
             automaticallyImplyLeading: false,
             leading: IconButton(
               icon: const Icon(Icons.home),
               onPressed: () => _confirmAbandon(context),
             ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.search),
-                tooltip: 'Cipher Lock',
-                onPressed: () =>
-                    Navigator.pushNamed(context, '/levels'),
-              ),
-              IconButton(
-                icon: const Icon(Icons.list_alt),
-                tooltip: 'Clue Tracker',
-                onPressed: () =>
-                    Navigator.pushNamed(context, '/clues'),
-              ),
-            ],
           ),
-          body: _MissionBody(),
+          body: _BriefingBody(),
         ),
-        if (game.showHint)
-          const Positioned.fill(child: HintOverlay()),
+        if (game.showHint) const Positioned.fill(child: HintOverlay()),
       ],
     );
   }
@@ -66,7 +50,7 @@ class MissionScreen extends StatelessWidget {
         title: const Text('Abandon mission?',
             style: TextStyle(color: AppColors.textPrimary)),
         content: const Text(
-            'Your progress will not be saved to the leaderboard.',
+            'Your progress will not be saved.',
             style: TextStyle(color: AppColors.textSecondary)),
         actions: [
           TextButton(
@@ -86,135 +70,139 @@ class MissionScreen extends StatelessWidget {
   }
 }
 
-class _MissionBody extends StatelessWidget {
+class _BriefingBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final game = context.watch<GameProvider>();
     final puzzle = game.activePuzzle!;
+    final mins = (puzzle.timeLimitSec / 60).round();
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Mission icon
+          Center(
+            child: Container(
+              width: 90,
+              height: 90,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primary.withOpacity(0.12),
+                border: Border.all(
+                    color: AppColors.primary.withOpacity(0.4), width: 2),
+              ),
+              child: const Icon(Icons.lock,
+                  color: AppColors.primary, size: 46),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: Text(puzzle.title,
+                style: const TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center),
+          ),
+          const SizedBox(height: 24),
+
           // Stats row
-          Row(children: [
-            Expanded(
-                child: TimerWidget(seconds: game.timeRemaining)),
-            const SizedBox(width: 10),
-            _Badge(Icons.lightbulb_outline,
-                '${game.cluesFound}/${game.clues.length}',
-                AppColors.primary),
-            const SizedBox(width: 8),
-            _Badge(
-                Icons.search,
-                '${game.foundWords.length}/${puzzle.wordsearch.words.length}',
-                AppColors.accentBlue),
-            const SizedBox(width: 8),
-            _Badge(Icons.psychology,
-                '${game.activeSession?.hintsUsed ?? 0} hints',
-                AppColors.accent),
-          ]),
-          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _InfoBox(Icons.timer, '$mins MIN', 'TIME LIMIT'),
+              _InfoBox(Icons.layers, '5', 'LEVELS'),
+              _InfoBox(Icons.star,
+                  puzzle.difficulty.toUpperCase(), 'DIFFICULTY'),
+            ],
+          ),
+          const SizedBox(height: 28),
 
           // Briefing
           _Section(
-            title: 'MISSION BRIEFING',
+            title: 'YOUR MISSION',
             child: Text(puzzle.description,
-                style: Theme.of(context).textTheme.bodyMedium),
+                style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 15,
+                    height: 1.7)),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
 
-          // Clues
+          // Level overview
           _Section(
-            title: 'CLUES  (tap to reveal)',
+            title: 'WHAT AWAITS YOU',
             child: Column(
-              children: game.clues.asMap().entries.map((e) {
-                final c = e.value;
-                return GestureDetector(
-                  onTap: () =>
-                      context.read<GameProvider>().findClue(c.id),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: c.isFound
-                          ? AppColors.success.withOpacity(0.12)
-                          : AppColors.background,
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: c.isFound
-                            ? AppColors.success.withOpacity(0.5)
-                            : AppColors.surfaceLight,
-                      ),
-                    ),
+              children: puzzle.levels.map((l) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          c.isFound
-                              ? Icons.check_circle
-                              : Icons.radio_button_unchecked,
-                          color: c.isFound
-                              ? AppColors.success
-                              : AppColors.textSecondary,
-                          size: 20,
+                        Container(
+                          width: 32,
+                          height: 32,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppColors.accent.withOpacity(0.15),
+                            border: Border.all(
+                                color: AppColors.accent.withOpacity(0.4)),
+                          ),
+                          child: Center(
+                            child: Text('${l.level}',
+                                style: const TextStyle(
+                                    color: AppColors.accent,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13)),
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: Text(
-                            c.isFound
-                                ? c.text
-                                : 'Tap to reveal clue ${e.key + 1}',
-                            style: TextStyle(
-                              color: c.isFound
-                                  ? AppColors.textPrimary
-                                  : AppColors.textSecondary,
-                              fontStyle: c.isFound
-                                  ? FontStyle.normal
-                                  : FontStyle.italic,
-                              fontSize: 14,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(l.title,
+                                  style: const TextStyle(
+                                      color: AppColors.textPrimary,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14)),
+                              const SizedBox(height: 2),
+                              Text(l.instruction,
+                                  style: const TextStyle(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 12,
+                                      height: 1.4)),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  ),
-                );
-              }).toList(),
+                  )).toList(),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 32),
 
-          // Cipher lock button
+          // Start button
           SizedBox(
             width: double.infinity,
+            height: 56,
             child: ElevatedButton.icon(
               onPressed: () =>
                   Navigator.pushNamed(context, '/levels'),
-              icon: const Icon(Icons.search),
-              label: const Text('OPEN WORD SEARCH CIPHER LOCK'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.accent,
-                foregroundColor: Colors.white,
-              ),
+              icon: const Icon(Icons.play_arrow, size: 22),
+              label: const Text('BEGIN LEVEL 1',
+                  style: TextStyle(fontSize: 16, letterSpacing: 1)),
             ),
           ),
-          const SizedBox(height: 10),
-
-          // Hint button
+          const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
               onPressed: () =>
-                  context.read<GameProvider>().requestHint(),
-              icon: const Icon(Icons.psychology, size: 18),
-              label: const Text('ASK GAME MASTER FOR HINT'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.accent,
-                side: BorderSide(
-                    color: AppColors.accent.withOpacity(0.5)),
-              ),
+                  Navigator.pushNamed(context, '/leaderboard'),
+              icon: const Icon(Icons.leaderboard, size: 18),
+              label: const Text('VIEW LEADERBOARD'),
             ),
           ),
         ],
@@ -229,10 +217,10 @@ class _Section extends StatelessWidget {
   const _Section({required this.title, required this.child});
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           color: AppColors.surfaceLight,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -243,40 +231,39 @@ class _Section extends StatelessWidget {
                     letterSpacing: 1.5,
                     color: AppColors.textSecondary,
                     fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             child,
           ],
         ),
       );
 }
 
-class _Badge extends StatelessWidget {
+class _InfoBox extends StatelessWidget {
   final IconData icon;
-  final String text;
-  final Color color;
-  const _Badge(this.icon, this.text, this.color);
+  final String value;
+  final String label;
+  const _InfoBox(this.icon, this.value, this.label);
   @override
-  Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.12),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 13, color: color),
-            const SizedBox(width: 4),
-            Text(text,
-                style: TextStyle(
-                    fontSize: 11,
-                    color: color,
-                    fontWeight: FontWeight.bold)),
-          ],
-        ),
+  Widget build(BuildContext context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: AppColors.primary, size: 22),
+          const SizedBox(height: 4),
+          Text(value,
+              style: const TextStyle(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16)),
+          Text(label,
+              style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 10,
+                  letterSpacing: 1)),
+        ],
       );
 }
 
+// Result screen 
 class _ResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -304,33 +291,6 @@ class _ResultScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1),
               ),
-              if (won) ...[
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 20, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: AppColors.accentBlue.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                        color: AppColors.accentBlue.withOpacity(0.4)),
-                  ),
-                  child: Column(children: [
-                    const Text('PASSPHRASE',
-                        style: TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 10,
-                            letterSpacing: 2)),
-                    const SizedBox(height: 4),
-                    Text(game.passphrase ?? '',
-                        style: const TextStyle(
-                            color: AppColors.accentBlue,
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 8)),
-                  ]),
-                ),
-              ],
               const SizedBox(height: 20),
               _ScoreRow(
                   label: 'SCORE',
@@ -342,43 +302,17 @@ class _ResultScreen extends StatelessWidget {
                 children: [
                   _ScoreRow(
                       label: 'TIME',
-                      value: game.activeSession?.elapsedFormatted ??
-                          '--'),
+                      value:
+                          game.activeSession?.elapsedFormatted ?? '--'),
                   _ScoreRow(
                       label: 'HINTS',
-                      value:
-                          '${game.activeSession?.hintsUsed ?? 0}'),
+                      value: '${game.activeSession?.hintsUsed ?? 0}'),
                   _ScoreRow(
                       label: 'MISTAKES',
                       value:
                           '${game.activeSession?.wrongHighlights ?? 0}'),
                 ],
               ),
-              if (won) ...[
-                const SizedBox(height: 20),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceLight,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(children: [
-                    const Text('CHAPTER REVEAL',
-                        style: TextStyle(
-                            fontSize: 10,
-                            letterSpacing: 1.5,
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    Text(game.activePuzzle?.storyReveal ?? '',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontStyle: FontStyle.italic,
-                            height: 1.5)),
-                  ]),
-                ),
-              ],
               const SizedBox(height: 28),
               SizedBox(
                 width: double.infinity,
@@ -386,16 +320,8 @@ class _ResultScreen extends StatelessWidget {
                   onPressed: () => Navigator.pushNamedAndRemoveUntil(
                       context, '/', (_) => false),
                   icon: const Icon(Icons.home),
-                  label: const Text('BACK TO MISSIONS'),
+                  label: const Text('BACK TO HOME'),
                 ),
-              ),
-              const SizedBox(height: 10),
-              TextButton(
-                onPressed: () =>
-                    Navigator.pushNamed(context, '/leaderboard'),
-                child: const Text('VIEW LEADERBOARD',
-                    style: TextStyle(
-                        color: AppColors.textSecondary)),
               ),
             ],
           ),
