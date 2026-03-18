@@ -12,22 +12,30 @@ class InterrogationScreen extends StatefulWidget {
 
 class _InterrogationScreenState extends State<InterrogationScreen> {
   int _currentQuestion = 0;
-  int _wrongAnswers = 0;
   int? _selectedOption;
   bool _answered = false;
   bool _correct = false;
+  bool _showHintText = false;
+
+  // One hint per question
+  final List<String> _hints = [
+    'Read the mission briefing carefully — the answer is right there.',
+    'Think about security systems — which one makes the loudest noise?',
+    'What do we call 12:00 at night? Think about AM and PM.',
+    'Think back to Level 1 — what was the first letter of the passphrase you found?',
+    'Remember the colors you connected in Level 2 — how many were there?',
+  ];
 
   @override
   Widget build(BuildContext context) {
     final game = context.watch<GameProvider>();
-    final questions =
-        game.activePuzzle!.interrogation.questions;
+    final questions = game.activePuzzle!.interrogation.questions;
     final question = questions[_currentQuestion];
     final isLastQuestion = _currentQuestion == questions.length - 1;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('LEVEL 3 — INTERROGATION'),
+        title: Text('LEVEL 3 — Q${_currentQuestion + 1} of ${questions.length}'),
         automaticallyImplyLeading: false,
       ),
       body: Column(
@@ -35,38 +43,16 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
           // Progress bar
           Container(
             color: AppColors.surface,
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Question ${_currentQuestion + 1} of ${questions.length}',
-                      style: const TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 12),
-                    ),
-                    Text(
-                      '$_wrongAnswers wrong',
-                      style: const TextStyle(
-                          color: AppColors.error, fontSize: 12),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: LinearProgressIndicator(
-                    value:
-                        (_currentQuestion) / questions.length,
-                    backgroundColor: AppColors.surfaceLight,
-                    valueColor: const AlwaysStoppedAnimation(
-                        AppColors.primary),
-                    minHeight: 6,
-                  ),
-                ),
-              ],
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: (_currentQuestion) / questions.length,
+                backgroundColor: AppColors.surfaceLight,
+                valueColor:
+                    const AlwaysStoppedAnimation(AppColors.primary),
+                minHeight: 6,
+              ),
             ),
           ),
 
@@ -79,8 +65,8 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                   // Suspect icon
                   Center(
                     child: Container(
-                      width: 80,
-                      height: 80,
+                      width: 72,
+                      height: 72,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: AppColors.surfaceLight,
@@ -89,23 +75,23 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                             width: 2),
                       ),
                       child: const Icon(Icons.person,
-                          color: AppColors.accent, size: 44),
+                          color: AppColors.accent, size: 40),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   const Center(
-                    child: Text('SUSPECT',
+                    child: Text('INTERROGATION',
                         style: TextStyle(
                             color: AppColors.textSecondary,
-                            fontSize: 11,
+                            fontSize: 10,
                             letterSpacing: 2)),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
 
                   // Question
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
                       color: AppColors.surfaceLight,
                       borderRadius: BorderRadius.circular(14),
@@ -122,7 +108,45 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
+
+                  // Hint button
+                  if (!_answered)
+                    GestureDetector(
+                      onTap: () => setState(
+                          () => _showHintText = !_showHintText),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                              color: AppColors.primary.withOpacity(0.3)),
+                        ),
+                        child: Row(children: [
+                          const Icon(Icons.lightbulb_outline,
+                              color: AppColors.primary, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _showHintText
+                                  ? _hints[_currentQuestion]
+                                  : 'Tap for a hint',
+                              style: TextStyle(
+                                  color: _showHintText
+                                      ? AppColors.primary
+                                      : AppColors.textSecondary,
+                                  fontSize: 13,
+                                  fontStyle: _showHintText
+                                      ? FontStyle.italic
+                                      : FontStyle.normal),
+                            ),
+                          ),
+                        ]),
+                      ),
+                    ),
+                  const SizedBox(height: 16),
 
                   // Options
                   ...question.options.asMap().entries.map((e) {
@@ -151,8 +175,7 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                     return GestureDetector(
                       onTap: _answered
                           ? null
-                          : () => setState(
-                              () => _selectedOption = idx),
+                          : () => setState(() => _selectedOption = idx),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
                         margin: const EdgeInsets.only(bottom: 10),
@@ -160,8 +183,7 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                         decoration: BoxDecoration(
                           color: bgColor,
                           borderRadius: BorderRadius.circular(12),
-                          border:
-                              Border.all(color: borderColor),
+                          border: Border.all(color: borderColor),
                         ),
                         child: Row(
                           children: [
@@ -170,8 +192,7 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                               height: 28,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: _selectedOption == idx &&
-                                        !_answered
+                                color: _selectedOption == idx && !_answered
                                     ? AppColors.primary
                                     : AppColors.background,
                                 border: Border.all(
@@ -185,12 +206,10 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                                   style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
-                                      color:
-                                          _selectedOption == idx &&
-                                                  !_answered
-                                              ? AppColors.background
-                                              : AppColors
-                                                  .textSecondary),
+                                      color: _selectedOption == idx &&
+                                              !_answered
+                                          ? AppColors.background
+                                          : AppColors.textSecondary),
                                 ),
                               ),
                             ),
@@ -198,14 +217,11 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                             Expanded(
                               child: Text(opt,
                                   style: TextStyle(
-                                      color: textColor,
-                                      fontSize: 14)),
+                                      color: textColor, fontSize: 14)),
                             ),
-                            if (_answered &&
-                                idx == question.correct)
+                            if (_answered && idx == question.correct)
                               const Icon(Icons.check_circle,
-                                  color: AppColors.success,
-                                  size: 20),
+                                  color: AppColors.success, size: 20),
                             if (_answered &&
                                 idx == _selectedOption &&
                                 idx != question.correct)
@@ -230,7 +246,7 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                         child: const Text('SUBMIT ANSWER'),
                       ),
                     )
-                  else
+                  else if (_correct)
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton.icon(
@@ -242,10 +258,7 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                             ? 'GET THE CODE'
                             : 'NEXT QUESTION'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: _correct
-                              ? AppColors.success
-                              : AppColors.primary,
-                        ),
+                            backgroundColor: AppColors.success),
                       ),
                     ),
                 ],
@@ -269,12 +282,59 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
     setState(() {
       _answered = true;
       _correct = isCorrect;
-      if (!isCorrect) {
-        _wrongAnswers++;
-        // Wrong answer costs 15 seconds
-        context.read<GameProvider>().activeSession?.wrongHighlights++;
-      }
     });
+
+    if (!isCorrect) {
+      // Show you lost popup
+      Future.delayed(const Duration(milliseconds: 400), () {
+        _showLostDialog();
+      });
+    }
+  }
+
+  void _showLostDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.cancel, color: AppColors.error, size: 64),
+            const SizedBox(height: 16),
+            const Text('YOU LOST!',
+                style: TextStyle(
+                    color: AppColors.error,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            const Text(
+                'Wrong answer. You must restart from the beginning.',
+                style: TextStyle(
+                    color: AppColors.textSecondary, fontSize: 13),
+                textAlign: TextAlign.center),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context); // close dialog
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, '/mission', (_) => false);
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text('RESTART FROM BRIEFING'),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.accent),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _nextQuestion() {
@@ -287,9 +347,9 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
         _selectedOption = null;
         _answered = false;
         _correct = false;
+        _showHintText = false;
       });
     } else {
-      // All questions done — complete the level
       final code = game.activePuzzle!.interrogation.code;
       game.completeLevel(code);
     }
