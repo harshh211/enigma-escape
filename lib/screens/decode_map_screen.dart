@@ -79,7 +79,7 @@ class _DecodeMapScreenState extends State<DecodeMapScreen> {
                     color: AppColors.primary, size: 32),
                 const SizedBox(height: 8),
                 const Text(
-                  'Drag the map pieces into the correct order\nto reveal the escape route.',
+                  'Hold and Drag the map pieces into the correct order\nto reveal the escape route.',
                   style: TextStyle(
                       color: AppColors.textSecondary, fontSize: 13),
                   textAlign: TextAlign.center,
