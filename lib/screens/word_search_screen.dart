@@ -79,56 +79,6 @@ class WordSearchScreen extends StatelessWidget {
                 ),
               ),
 
-              // Word chips
-              Container(
-                height: 72,
-                color: AppColors.surface,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 12),
-                  itemCount: ws.words.length,
-                  separatorBuilder: (_, __) =>
-                      const SizedBox(width: 8),
-                  itemBuilder: (context, i) {
-                    final word = ws.words[i].toUpperCase();
-                    final found = game.foundWords.contains(word);
-
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: found
-                            ? AppColors.cellFound.withOpacity(0.18)
-                            : AppColors.surfaceLight,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: found
-                              ? AppColors.cellFound
-                              : Colors.transparent,
-                        ),
-                      ),
-                      child: Text(
-                        word,
-                        style: TextStyle(
-                          color: found
-                              ? AppColors.cellFound
-                              : AppColors.textSecondary,
-                          fontWeight: found
-                              ? FontWeight.bold
-                              : FontWeight.normal,
-                          fontSize: 13,
-                          decoration: found
-                              ? TextDecoration.lineThrough
-                              : null,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-
               // Buttons
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),

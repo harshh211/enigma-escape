@@ -12,7 +12,6 @@ import 'screens/achievements_screen.dart';
 import 'screens/leaderboard_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/final_code_screen.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await PuzzleService.instance.loadPuzzles();
