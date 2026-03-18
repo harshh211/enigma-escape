@@ -1,3 +1,6 @@
+// lib/screens/interrogation_screen.dart
+
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
@@ -18,14 +21,53 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
   bool _correct = false;
   bool _showHintText = false;
 
-  // One hint per question
+  // 15 second hint cooldown per question
+  int _hintCountdown = 15;
+  bool _hintUnlocked = false;
+  Timer? _hintTimer;
+
   final List<String> _hints = [
     'Read the mission briefing carefully — the answer is right there.',
     'Think about security systems — which one makes the loudest noise?',
     'What do we call 12:00 at night? Think about AM and PM.',
     'Think back to Level 1 — what was the first letter of the passphrase you found?',
-    'Remember the colors you connected in Level 2 — how many were there?',
+    'Remember the colors you connected in Level 2 — was orange one of them?',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _startHintTimer();
+  }
+
+  @override
+  void dispose() {
+    _hintTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startHintTimer() {
+    _hintTimer?.cancel();
+    setState(() {
+      _hintCountdown = 15;
+      _hintUnlocked = false;
+      _showHintText = false;
+    });
+    _hintTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) {
+        _hintTimer?.cancel();
+        return;
+      }
+      setState(() {
+        if (_hintCountdown > 0) {
+          _hintCountdown--;
+        } else {
+          _hintUnlocked = true;
+          _hintTimer?.cancel();
+        }
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,12 +78,14 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('LEVEL 3 — Q${_currentQuestion + 1} of ${questions.length}'),
+        title: Text(
+            'LEVEL 3 — Q${_currentQuestion + 1} of ${questions.length}'),
         automaticallyImplyLeading: false,
       ),
       body: Column(
         children: [
           const LevelTimerBar(),
+
           // Progress bar
           Container(
             color: AppColors.surface,
@@ -115,36 +159,67 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                   // Hint button
                   if (!_answered)
                     GestureDetector(
-                      onTap: () => setState(
-                          () => _showHintText = !_showHintText),
+                      onTap: _hintUnlocked
+                          ? () => setState(
+                              () => _showHintText = !_showHintText)
+                          : null,
                       child: Container(
                         width: double.infinity,
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.08),
+                          color: _hintUnlocked
+                              ? AppColors.primary.withOpacity(0.08)
+                              : AppColors.surfaceLight,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                              color: AppColors.primary.withOpacity(0.3)),
+                              color: _hintUnlocked
+                                  ? AppColors.primary.withOpacity(0.3)
+                                  : AppColors.textSecondary
+                                      .withOpacity(0.2)),
                         ),
                         child: Row(children: [
-                          const Icon(Icons.lightbulb_outline,
-                              color: AppColors.primary, size: 18),
+                          Icon(
+                            Icons.lightbulb_outline,
+                            color: _hintUnlocked
+                                ? AppColors.primary
+                                : AppColors.textSecondary,
+                            size: 18,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               _showHintText
                                   ? _hints[_currentQuestion]
-                                  : 'Tap for a hint',
+                                  : _hintUnlocked
+                                      ? 'Tap for a hint'
+                                      : 'Hint available in ${_hintCountdown}s',
                               style: TextStyle(
                                   color: _showHintText
                                       ? AppColors.primary
-                                      : AppColors.textSecondary,
+                                      : _hintUnlocked
+                                          ? AppColors.textSecondary
+                                          : AppColors.textSecondary
+                                              .withOpacity(0.5),
                                   fontSize: 13,
                                   fontStyle: _showHintText
                                       ? FontStyle.italic
                                       : FontStyle.normal),
                             ),
                           ),
+                          if (!_hintUnlocked)
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                value: (15 - _hintCountdown) / 15,
+                                strokeWidth: 2,
+                                backgroundColor:
+                                    AppColors.surfaceLight,
+                                valueColor:
+                                    const AlwaysStoppedAnimation(
+                                        AppColors.primary),
+                              ),
+                            ),
                         ]),
                       ),
                     ),
@@ -177,7 +252,8 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                     return GestureDetector(
                       onTap: _answered
                           ? null
-                          : () => setState(() => _selectedOption = idx),
+                          : () =>
+                              setState(() => _selectedOption = idx),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
                         margin: const EdgeInsets.only(bottom: 10),
@@ -194,9 +270,10 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                               height: 28,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: _selectedOption == idx && !_answered
-                                    ? AppColors.primary
-                                    : AppColors.background,
+                                color:
+                                    _selectedOption == idx && !_answered
+                                        ? AppColors.primary
+                                        : AppColors.background,
                                 border: Border.all(
                                     color: _selectedOption == idx
                                         ? AppColors.primary
@@ -219,7 +296,8 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                             Expanded(
                               child: Text(opt,
                                   style: TextStyle(
-                                      color: textColor, fontSize: 14)),
+                                      color: textColor,
+                                      fontSize: 14)),
                             ),
                             if (_answered && idx == question.correct)
                               const Icon(Icons.check_circle,
@@ -242,9 +320,8 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: _selectedOption == null
-                            ? null
-                            : _submitAnswer,
+                        onPressed:
+                            _selectedOption == null ? null : _submitAnswer,
                         child: const Text('SUBMIT ANSWER'),
                       ),
                     )
@@ -287,7 +364,6 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
     });
 
     if (!isCorrect) {
-      // Show you lost popup
       Future.delayed(const Duration(milliseconds: 400), () {
         _showLostDialog();
       });
@@ -323,7 +399,7 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  Navigator.pop(context); // close dialog
+                  Navigator.pop(context);
                   Navigator.pushNamedAndRemoveUntil(
                       context, '/mission', (_) => false);
                 },
@@ -349,8 +425,8 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
         _selectedOption = null;
         _answered = false;
         _correct = false;
-        _showHintText = false;
       });
+      _startHintTimer();
     } else {
       final code = game.activePuzzle!.interrogation.code;
       game.completeLevel(code);

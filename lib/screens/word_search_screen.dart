@@ -84,14 +84,19 @@ class WordSearchScreen extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
                 child: Column(children: [
                   // Hint button
-                  SizedBox(
+                    SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: () =>
-                          _showHintPassage(context, ws.words),
+                      onPressed: game.hintAvailable
+                          ? () => _showHintPassage(context, ws.words)
+                          : null,
                       icon: const Icon(Icons.lightbulb_outline,
                           size: 16),
-                      label: const Text('HINT — VIEW PASSAGE'),
+                      label: game.hintAvailable
+                          ? const Text('HINT — VIEW PASSAGE')
+                          : Text(
+                              'HINT AVAILABLE IN ${60 - (game.activeSession != null ? DateTime.now().difference(game.activeSession!.startTime).inSeconds.clamp(0, 60) : 0)}s',
+                            ),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.primary,
                         side: BorderSide(
