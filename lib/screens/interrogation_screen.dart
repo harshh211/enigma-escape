@@ -160,8 +160,12 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                   if (!_answered)
                     GestureDetector(
                       onTap: _hintUnlocked
-                          ? () => setState(
-                              () => _showHintText = !_showHintText)
+                          ? () {
+                              if (!_showHintText) {
+                                context.read<GameProvider>().activeSession?.hintsUsed++;
+                              }
+                              setState(() => _showHintText = !_showHintText);
+                            }
                           : null,
                       child: Container(
                         width: double.infinity,
@@ -350,10 +354,8 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
   }
 
   void _submitAnswer() {
-    final question = context
-        .read<GameProvider>()
-        .activePuzzle!
-        .interrogation
+    final game = context.read<GameProvider>();
+    final question = game.activePuzzle!.interrogation
         .questions[_currentQuestion];
 
     final isCorrect = _selectedOption == question.correct;
@@ -364,6 +366,8 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
     });
 
     if (!isCorrect) {
+      // Track wrong answer
+      game.activeSession?.wrongHighlights++;
       Future.delayed(const Duration(milliseconds: 400), () {
         _showLostDialog();
       });
