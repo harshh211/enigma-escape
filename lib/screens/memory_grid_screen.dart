@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
 import '../utils/app_theme.dart';
 
-enum MemoryPhase { memorize, recall, result }
+enum MemoryPhase { memorize, recall, lost }
 
 class MemoryGridScreen extends StatefulWidget {
   const MemoryGridScreen({super.key});
@@ -15,74 +15,163 @@ class MemoryGridScreen extends StatefulWidget {
 class _MemoryGridScreenState extends State<MemoryGridScreen> {
   MemoryPhase _phase = MemoryPhase.memorize;
   List<int> _playerSequence = [];
-  bool _failed = false;
   int _attempts = 0;
+  static const int _maxAttempts = 3;
 
   late List<int> _sequence;
   late int _gridSize;
+  int _countdown = 5;
+  bool _countingDown = true;
 
   @override
   void initState() {
     super.initState();
-    final data =
-        context.read<GameProvider>().activePuzzle!.memoryGrid;
+    final data = context.read<GameProvider>().activePuzzle!.memoryGrid;
     _sequence = data.sequence;
     _gridSize = data.gridSize;
+    _startCountdown();
+  }
 
-    // Auto switch to recall after 4 seconds
-    Future.delayed(const Duration(seconds: 4), () {
-      if (mounted && _phase == MemoryPhase.memorize) {
-        setState(() => _phase = MemoryPhase.recall);
+  void _startCountdown() {
+    setState(() {
+      _phase = MemoryPhase.memorize;
+      _countdown = 5;
+      _countingDown = true;
+      _playerSequence = [];
+    });
+
+    Future.doWhile(() async {
+      await Future.delayed(const Duration(seconds: 1));
+      if (!mounted) return false;
+      setState(() => _countdown--);
+      if (_countdown <= 0) {
+        setState(() {
+          _countingDown = false;
+          _phase = MemoryPhase.recall;
+        });
+        return false;
       }
+      return true;
     });
   }
 
   void _onTileTap(int index) {
     if (_phase != MemoryPhase.recall) return;
 
-    setState(() {
-      _playerSequence = [..._playerSequence, index];
-    });
+    final newSeq = [..._playerSequence, index];
+    setState(() => _playerSequence = newSeq);
 
-    final step = _playerSequence.length - 1;
+    final step = newSeq.length - 1;
 
     // Wrong tile
-    if (_playerSequence[step] != _sequence[step]) {
-      setState(() {
-        _failed = true;
-        _phase = MemoryPhase.result;
-        _attempts++;
-      });
+    if (newSeq[step] != _sequence[step]) {
+      _attempts++;
+      if (_attempts >= _maxAttempts) {
+        setState(() => _phase = MemoryPhase.lost);
+        Future.delayed(const Duration(milliseconds: 300), _showLostDialog);
+      } else {
+        _showWrongDialog();
+      }
       return;
     }
 
-    // Completed sequence correctly
-    if (_playerSequence.length == _sequence.length) {
-      setState(() {
-        _phase = MemoryPhase.result;
-      });
-      Future.delayed(const Duration(milliseconds: 500), () {
-        final code = context
-            .read<GameProvider>()
-            .activePuzzle!
-            .memoryGrid
-            .code;
+    // Correct sequence completed
+    if (newSeq.length == _sequence.length) {
+      Future.delayed(const Duration(milliseconds: 400), () {
+        final code =
+            context.read<GameProvider>().activePuzzle!.memoryGrid.code;
         context.read<GameProvider>().completeLevel(code);
       });
     }
   }
 
-  void _tryAgain() {
-    setState(() {
-      _phase = MemoryPhase.memorize;
-      _playerSequence = [];
-      _failed = false;
-    });
-    Future.delayed(const Duration(seconds: 4), () {
-      if (mounted && _phase == MemoryPhase.memorize) {
-        setState(() => _phase = MemoryPhase.recall);
-      }
-    });
+  void _showWrongDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.close, color: AppColors.error, size: 56),
+            const SizedBox(height: 12),
+            Text('WRONG SEQUENCE',
+                style: const TextStyle(
+                    color: AppColors.error,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold)),
+            const SizedBox(height: 6),
+            Text(
+              '${_maxAttempts - _attempts} attempt${_maxAttempts - _attempts != 1 ? 's' : ''} remaining',
+              style: const TextStyle(
+                  color: AppColors.textSecondary, fontSize: 13),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _startCountdown();
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text('TRY AGAIN'),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.accent),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showLostDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.cancel, color: AppColors.error, size: 64),
+            const SizedBox(height: 16),
+            const Text('YOU LOST!',
+                style: TextStyle(
+                    color: AppColors.error,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            const Text(
+                'You used all 3 attempts. Restart from the beginning.',
+                style: TextStyle(
+                    color: AppColors.textSecondary, fontSize: 13),
+                textAlign: TextAlign.center),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, '/mission', (_) => false);
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text('RESTART FROM BRIEFING'),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.accent),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -100,130 +189,70 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
             width: double.infinity,
             color: _phase == MemoryPhase.memorize
                 ? AppColors.primary.withOpacity(0.15)
-                : _phase == MemoryPhase.recall
-                    ? AppColors.accent.withOpacity(0.15)
-                    : AppColors.success.withOpacity(0.15),
-            padding: const EdgeInsets.symmetric(
-                vertical: 12, horizontal: 20),
+                : AppColors.accent.withOpacity(0.15),
+            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
             child: Column(
               children: [
                 Text(
                   _phase == MemoryPhase.memorize
-                      ? '👁  MEMORIZE THE SEQUENCE'
-                      : _phase == MemoryPhase.recall
-                          ? '🧠  NOW REPEAT IT'
-                          : _failed
-                              ? '✗  WRONG — TRY AGAIN'
-                              : '✓  CORRECT!',
+                      ? 'MEMORIZE THE BLOCKS'
+                      : 'TAP THE BLOCKS IN ORDER',
                   style: TextStyle(
                     color: _phase == MemoryPhase.memorize
                         ? AppColors.primary
-                        : _phase == MemoryPhase.recall
-                            ? AppColors.accent
-                            : _failed
-                                ? AppColors.error
-                                : AppColors.success,
+                        : AppColors.accent,
                     fontWeight: FontWeight.bold,
-                    fontSize: 15,
+                    fontSize: 16,
                     letterSpacing: 1,
                   ),
                   textAlign: TextAlign.center,
                 ),
-                if (_phase == MemoryPhase.memorize) ...[
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Switching to recall in 4 seconds...',
-                    style: TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 11),
+                if (_phase == MemoryPhase.memorize && _countingDown) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    'Switching in $_countdown seconds...',
+                    style: const TextStyle(
+                        color: AppColors.textSecondary, fontSize: 12),
                   ),
                 ],
                 if (_phase == MemoryPhase.recall) ...[
                   const SizedBox(height: 4),
                   Text(
-                    '${_playerSequence.length} / ${_sequence.length} tapped',
+                    '${_playerSequence.length} / ${_sequence.length} tapped  ·  Attempt ${_attempts + 1} of $_maxAttempts',
                     style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 11),
+                        color: AppColors.textSecondary, fontSize: 12),
                   ),
                 ],
               ],
             ),
           ),
 
-          // Sequence display (only during memorize phase)
-          if (_phase == MemoryPhase.memorize)
-            Container(
-              color: AppColors.surface,
-              padding: const EdgeInsets.all(12),
-              child: Wrap(
-                spacing: 8,
-                children: _sequence.asMap().entries.map((e) {
-                  return Container(
-                    width: 36,
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColors.primary),
-                    ),
-                    child: Center(
-                      child: Text(
-                        '${e.value + 1}',
-                        style: const TextStyle(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-
           // Grid
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               child: AspectRatio(
                 aspectRatio: 1,
                 child: GridView.builder(
                   physics: const NeverScrollableScrollPhysics(),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: _gridSize,
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
                   ),
                   itemCount: _gridSize * _gridSize,
                   itemBuilder: (context, idx) {
-                    final isInSequence =
-                        _sequence.contains(idx);
-                    final posInSequence =
-                        _sequence.indexOf(idx);
-                    final isTapped =
-                        _playerSequence.contains(idx);
+                    final isInSequence = _sequence.contains(idx);
+                    final isTapped = _playerSequence.contains(idx);
 
                     Color bg;
-                    Widget child;
 
-                    if (_phase == MemoryPhase.memorize &&
-                        isInSequence) {
-                      bg = AppColors.primary.withOpacity(0.3);
-                      child = Text(
-                        '${posInSequence + 1}',
-                        style: const TextStyle(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18),
-                      );
-                    } else if (_phase == MemoryPhase.recall &&
-                        isTapped) {
-                      bg = AppColors.accent.withOpacity(0.4);
-                      child = const Icon(Icons.check,
-                          color: AppColors.accent, size: 20);
+                    if (_phase == MemoryPhase.memorize && isInSequence) {
+                      bg = AppColors.primary.withOpacity(0.7);
+                    } else if (_phase == MemoryPhase.recall && isTapped) {
+                      bg = AppColors.accent.withOpacity(0.6);
                     } else {
                       bg = AppColors.surfaceLight;
-                      child = const SizedBox.shrink();
                     }
 
                     return GestureDetector(
@@ -232,15 +261,26 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
                         duration: const Duration(milliseconds: 150),
                         decoration: BoxDecoration(
                           color: bg,
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: _phase == MemoryPhase.memorize &&
                                     isInSequence
                                 ? AppColors.primary
                                 : AppColors.surface,
+                            width: 2,
                           ),
+                          boxShadow: _phase == MemoryPhase.memorize &&
+                                  isInSequence
+                              ? [
+                                  BoxShadow(
+                                    color:
+                                        AppColors.primary.withOpacity(0.4),
+                                    blurRadius: 8,
+                                    spreadRadius: 1,
+                                  )
+                                ]
+                              : null,
                         ),
-                        child: Center(child: child),
                       ),
                     );
                   },
@@ -248,29 +288,6 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
               ),
             ),
           ),
-
-          // Try again button
-          if (_phase == MemoryPhase.result && _failed)
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(children: [
-                Text('Attempts: $_attempts',
-                    style: const TextStyle(
-                        color: AppColors.textSecondary,
-                        fontSize: 13)),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: _tryAgain,
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('TRY AGAIN'),
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.accent),
-                  ),
-                ),
-              ]),
-            ),
         ],
       ),
     );
