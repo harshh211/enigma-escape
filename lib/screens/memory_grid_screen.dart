@@ -257,6 +257,8 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
                       bg = AppColors.surfaceLight;
                     }
 
+                    final posInSequence = _sequence.indexOf(idx);
+
                     return GestureDetector(
                       onTap: () => _onTileTap(idx),
                       child: AnimatedContainer(
@@ -275,14 +277,25 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
                                   isInSequence
                               ? [
                                   BoxShadow(
-                                    color:
-                                        AppColors.primary.withOpacity(0.4),
+                                    color: AppColors.primary.withOpacity(0.4),
                                     blurRadius: 8,
                                     spreadRadius: 1,
                                   )
                                 ]
                               : null,
                         ),
+                        child: _phase == MemoryPhase.memorize && isInSequence
+                            ? Center(
+                                child: Text(
+                                  '${posInSequence + 1}',
+                                  style: const TextStyle(
+                                    color: AppColors.background,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 22,
+                                  ),
+                                ),
+                              )
+                            : null,
                       ),
                     );
                   },
