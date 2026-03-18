@@ -30,7 +30,8 @@ class WordSearchScreen extends StatelessWidget {
       children: [
         Scaffold(
           appBar: AppBar(
-            title: const Text('CIPHER LOCK'),
+            title: const Text('LEVEL 1 — WORD SEARCH'),
+            automaticallyImplyLeading: false,
             actions: [
               Center(
                 child: Padding(
@@ -48,15 +49,16 @@ class WordSearchScreen extends StatelessWidget {
           body: Column(
             children: [
               const LevelTimerBar(),
+
               // Instruction bar
               Container(
                 width: double.infinity,
                 color: AppColors.surface,
                 padding: const EdgeInsets.symmetric(
                     horizontal: 16, vertical: 10),
-                child: Text(
-                  'Find in order: ${ws.correctSequence.join(' → ')}\nFirst letters of found words spell the passphrase.',
-                  style: const TextStyle(
+                child: const Text(
+                  'Find the 5 hidden words in the grid.',
+                  style: TextStyle(
                       color: AppColors.textSecondary, fontSize: 12),
                   textAlign: TextAlign.center,
                 ),
@@ -91,12 +93,6 @@ class WordSearchScreen extends StatelessWidget {
                   itemBuilder: (context, i) {
                     final word = ws.words[i].toUpperCase();
                     final found = game.foundWords.contains(word);
-                    final nextWord = ws.correctSequence
-                        .map((w) => w.toUpperCase())
-                        .firstWhere(
-                            (w) => !game.foundWords.contains(w),
-                            orElse: () => '');
-                    final isNext = word == nextWord;
 
                     return AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
@@ -105,16 +101,12 @@ class WordSearchScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: found
                             ? AppColors.cellFound.withOpacity(0.18)
-                            : isNext
-                                ? AppColors.primary.withOpacity(0.18)
-                                : AppColors.surfaceLight,
+                            : AppColors.surfaceLight,
                         borderRadius: BorderRadius.circular(20),
                         border: Border.all(
                           color: found
                               ? AppColors.cellFound
-                              : isNext
-                                  ? AppColors.primary
-                                  : Colors.transparent,
+                              : Colors.transparent,
                         ),
                       ),
                       child: Text(
@@ -122,10 +114,8 @@ class WordSearchScreen extends StatelessWidget {
                         style: TextStyle(
                           color: found
                               ? AppColors.cellFound
-                              : isNext
-                                  ? AppColors.primary
-                                  : AppColors.textSecondary,
-                          fontWeight: found || isNext
+                              : AppColors.textSecondary,
+                          fontWeight: found
                               ? FontWeight.bold
                               : FontWeight.normal,
                           fontSize: 13,
@@ -141,29 +131,47 @@ class WordSearchScreen extends StatelessWidget {
 
               // Buttons
               Padding(
-                padding:
-                    const EdgeInsets.fromLTRB(12, 8, 12, 16),
-                child: Row(children: [
-                  Expanded(
-                    child: OutlinedButton(
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
+                child: Column(children: [
+                  // Hint button
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
                       onPressed: () =>
-                          context.read<GameProvider>().clearSelection(),
-                      child: const Text('CLEAR'),
+                          _showHintPassage(context, ws.words),
+                      icon: const Icon(Icons.lightbulb_outline,
+                          size: 16),
+                      label: const Text('HINT — VIEW PASSAGE'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: BorderSide(
+                            color: AppColors.primary.withOpacity(0.4)),
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    flex: 2,
-                    child: ElevatedButton.icon(
-                      onPressed: game.selectedCells.isEmpty
-                          ? null
-                          : () => context
-                              .read<GameProvider>()
-                              .submitSelection(),
-                      icon: const Icon(Icons.check, size: 18),
-                      label: const Text('SUBMIT WORD'),
+                  const SizedBox(height: 8),
+                  Row(children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () =>
+                            context.read<GameProvider>().clearSelection(),
+                        child: const Text('CLEAR'),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton.icon(
+                        onPressed: game.selectedCells.isEmpty
+                            ? null
+                            : () => context
+                                .read<GameProvider>()
+                                .submitSelection(),
+                        icon: const Icon(Icons.check, size: 18),
+                        label: const Text('SUBMIT WORD'),
+                      ),
+                    ),
+                  ]),
                 ]),
               ),
             ],
@@ -174,7 +182,42 @@ class WordSearchScreen extends StatelessWidget {
       ],
     );
   }
+
+  void _showHintPassage(BuildContext context, List<String> words) {
+    final passage =
+        context.read<GameProvider>().activePuzzle!.description;
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20)),
+        title: const Row(children: [
+          Icon(Icons.lightbulb, color: AppColors.primary, size: 20),
+          SizedBox(width: 8),
+          Text('PASSAGE HINT',
+              style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold)),
+        ]),
+        content: SingleChildScrollView(
+          child: _HighlightedPassage(
+              passage: passage, words: words),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CLOSE',
+                style: TextStyle(color: AppColors.accent)),
+          ),
+        ],
+      ),
+    );
+  }
 }
+
 
 class _Grid extends StatelessWidget {
   final List<List<String>> grid;
@@ -252,4 +295,82 @@ class _Grid extends StatelessWidget {
       },
     );
   }
+}
+
+
+class _HighlightedPassage extends StatelessWidget {
+  final String passage;
+  final List<String> words;
+
+  const _HighlightedPassage(
+      {required this.passage, required this.words});
+
+  @override
+  Widget build(BuildContext context) {
+    final spans = <TextSpan>[];
+    final upper = passage.toUpperCase();
+    int current = 0;
+
+    
+    final List<_WordPos> positions = [];
+    for (final word in words) {
+      int idx = upper.indexOf(word.toUpperCase());
+      while (idx != -1) {
+        positions.add(_WordPos(idx, idx + word.length, word));
+        idx = upper.indexOf(word.toUpperCase(), idx + 1);
+      }
+    }
+    positions.sort((a, b) => a.start.compareTo(b.start));
+
+    
+    final List<_WordPos> clean = [];
+    for (final p in positions) {
+      if (clean.isEmpty || p.start >= clean.last.end) {
+        clean.add(p);
+      }
+    }
+
+    
+    for (final pos in clean) {
+      if (current < pos.start) {
+        spans.add(TextSpan(
+          text: passage.substring(current, pos.start),
+          style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 14,
+              height: 1.6),
+        ));
+      }
+      spans.add(TextSpan(
+        text: passage.substring(pos.start, pos.end),
+        style: const TextStyle(
+          color: AppColors.background,
+          backgroundColor: AppColors.primary,
+          fontWeight: FontWeight.bold,
+          fontSize: 14,
+          height: 1.6,
+        ),
+      ));
+      current = pos.end;
+    }
+
+    if (current < passage.length) {
+      spans.add(TextSpan(
+        text: passage.substring(current),
+        style: const TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 14,
+            height: 1.6),
+      ));
+    }
+
+    return RichText(text: TextSpan(children: spans));
+  }
+}
+
+class _WordPos {
+  final int start;
+  final int end;
+  final String word;
+  _WordPos(this.start, this.end, this.word);
 }
