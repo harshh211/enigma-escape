@@ -321,6 +321,16 @@ class GameProvider extends ChangeNotifier {
   void completeLevel(String code) {
     _completedLevelCodes = [..._completedLevelCodes, code];
     _levelComplete = true;
+    // Save end time when last level is completed
+    if (_completedLevelCodes.length == totalLevels) {
+      _activeSession?.endTime = DateTime.now();
+      _activeSession?.isCompleted = true;
+      _activeSession?.score = _activeSession!.calculateScore(
+          _activePuzzle?.timeLimitSec ?? 600);
+      if (_activeSession != null) {
+        DatabaseHelper.instance.updateSession(_activeSession!);
+      }
+    }
     notifyListeners();
   }
 
