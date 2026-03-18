@@ -188,13 +188,18 @@ class _BriefingBody extends StatelessWidget {
             width: double.infinity,
             height: 56,
             child: ElevatedButton.icon(
-              onPressed: () =>
-                  Navigator.pushNamed(context, '/levels'),
-              icon: const Icon(Icons.play_arrow, size: 22),
-              label: const Text('BEGIN LEVEL 1',
-                  style: TextStyle(fontSize: 16, letterSpacing: 1)),
-            ),
+              onPressed: () async {
+              context.read<GameProvider>().startTimer();
+              await Future.delayed(const Duration(milliseconds: 100));
+              if (context.mounted) {
+                Navigator.pushNamed(context, '/levels');
+              }
+            },
+            icon: const Icon(Icons.play_arrow, size: 22),
+            label: const Text('BEGIN LEVEL 1',
+                style: TextStyle(fontSize: 16, letterSpacing: 1)),
           ),
+        ),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,

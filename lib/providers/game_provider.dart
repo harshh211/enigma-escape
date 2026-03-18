@@ -1,3 +1,5 @@
+// lib/providers/game_provider.dart
+
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,7 +12,7 @@ import '../services/hint_engine.dart';
 import '../utils/word_search_solver.dart';
 
 class GameProvider extends ChangeNotifier {
-  // Settings 
+  // Settings
   String _teamName = 'Team Enigma';
   String _difficulty = 'easy';
   bool _isDarkMode = true;
@@ -19,7 +21,7 @@ class GameProvider extends ChangeNotifier {
   String get difficulty => _difficulty;
   bool get isDarkMode => _isDarkMode;
 
-  //  Active session 
+  // Active session 
   GameSession? _activeSession;
   Puzzle? _activePuzzle;
   List<Clue> _clues = [];
@@ -36,22 +38,12 @@ class GameProvider extends ChangeNotifier {
   bool get timedOut => _timedOut;
   int get cluesFound => _clues.where((c) => c.isFound).length;
 
-  // Word Search state 
+  // Word Search state
   List<GridCell> _selectedCells = [];
   Set<String> _foundWords = {};
   List<String> _foundWordsInOrder = [];
   bool _wordSearchComplete = false;
   String? _passphrase;
-
-  // Level progression 
-  int _currentLevel = 1;
-  List<String> _completedLevelCodes = [];
-  bool _levelComplete = false;
-
-  int get currentLevel => _currentLevel;
-  List<String> get completedLevelCodes => List.unmodifiable(_completedLevelCodes);
-  bool get levelComplete => _levelComplete;
-  int get totalLevels => _activePuzzle?.levels.length ?? 5;
 
   List<GridCell> get selectedCells => List.unmodifiable(_selectedCells);
   Set<String> get foundWords => Set.unmodifiable(_foundWords);
@@ -59,11 +51,28 @@ class GameProvider extends ChangeNotifier {
   bool get wordSearchComplete => _wordSearchComplete;
   String? get passphrase => _passphrase;
 
-  // Hint state 
+  // Hint state
   HintResult? _pendingHint;
   bool _showHint = false;
+  DateTime? _levelStartTime;
+  bool get hintAvailable {
+    if (_levelStartTime == null) return false;
+    return DateTime.now().difference(_levelStartTime!).inSeconds >= 60;
+  }
+
   bool get showHint => _showHint;
   HintResult? get pendingHint => _pendingHint;
+
+  // Level progression
+  int _currentLevel = 1;
+  List<String> _completedLevelCodes = [];
+  bool _levelComplete = false;
+
+  int get currentLevel => _currentLevel;
+  List<String> get completedLevelCodes =>
+      List.unmodifiable(_completedLevelCodes);
+  bool get levelComplete => _levelComplete;
+  int get totalLevels => _activePuzzle?.levels.length ?? 5;
 
   // Leaderboard & Achievements 
   List<GameSession> _leaderboard = [];
@@ -71,7 +80,7 @@ class GameProvider extends ChangeNotifier {
   List<GameSession> get leaderboard => List.unmodifiable(_leaderboard);
   List<Achievement> get achievements => List.unmodifiable(_achievements);
 
-  // ───────────────────────────────────
+  
 
   Future<void> loadPrefs() async {
     final p = await SharedPreferences.getInstance();
@@ -107,7 +116,7 @@ class GameProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ─────────────────────
+  
 
   Future<void> startSession(Puzzle puzzle) async {
     _timer?.cancel();
@@ -119,14 +128,14 @@ class GameProvider extends ChangeNotifier {
     _foundWordsInOrder = [];
     _wordSearchComplete = false;
     _passphrase = null;
-    _currentLevel = 1;
-    _completedLevelCodes = [];
-    _levelComplete = false;
     _sessionComplete = false;
     _timedOut = false;
     _showHint = false;
     _pendingHint = null;
     _timeRemaining = puzzle.timeLimitSec;
+    _currentLevel = 1;
+    _completedLevelCodes = [];
+    _levelComplete = false;
 
     final id = const Uuid().v4();
     _activeSession = GameSession(
@@ -142,12 +151,18 @@ class GameProvider extends ChangeNotifier {
     }
 
     HintEngine.instance.clearSession(id);
-    HintEngine.instance.recordActivity(id);
-    _startTimer();
+    
     notifyListeners();
   }
 
+  
+  void startTimer() {
+    _levelStartTime = DateTime.now();
+    _startTimer();
+  }
+
   void _startTimer() {
+    _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) async {
       if (_sessionComplete) {
         _timer?.cancel();
@@ -155,12 +170,6 @@ class GameProvider extends ChangeNotifier {
       }
       if (_timeRemaining > 0) {
         _timeRemaining--;
-        final sid = _activeSession?.sessionId;
-        if (sid != null &&
-            HintEngine.instance.shouldAutoTrigger(sid) &&
-            !_showHint) {
-          await _fetchAndShowHint();
-        }
         notifyListeners();
       } else {
         _timer?.cancel();
@@ -174,7 +183,8 @@ class GameProvider extends ChangeNotifier {
   Future<void> findClue(String clueId) async {
     final idx = _clues.indexWhere((c) => c.id == clueId);
     if (idx == -1 || _clues[idx].isFound) return;
-    _clues[idx] = _clues[idx].copyWith(isFound: true, foundAt: DateTime.now());
+    _clues[idx] = _clues[idx].copyWith(
+        isFound: true, foundAt: DateTime.now());
     await DatabaseHelper.instance
         .markClueFound(_activeSession!.sessionId, clueId);
     HintEngine.instance.recordActivity(_activeSession!.sessionId);
@@ -192,7 +202,6 @@ class GameProvider extends ChangeNotifier {
       list.add(cell);
     }
     _selectedCells = list;
-    HintEngine.instance.recordActivity(_activeSession?.sessionId ?? '');
     notifyListeners();
   }
 
@@ -217,12 +226,10 @@ class GameProvider extends ChangeNotifier {
     if (matched != null) {
       _foundWords = {..._foundWords, matched};
       _foundWordsInOrder = [..._foundWordsInOrder, matched];
-      HintEngine.instance.resetWrongStreak(_activeSession!.sessionId);
-      HintEngine.instance.recordActivity(_activeSession!.sessionId);
 
       if (_foundWordsInOrder.length ==
           _activePuzzle!.wordsearch.correctSequence.length) {
-        
+        // Always use the fixed passphrase from JSON
         _passphrase = _activePuzzle!.wordsearch.passphrase;
         _wordSearchComplete = true;
         _selectedCells = [];
@@ -234,7 +241,6 @@ class GameProvider extends ChangeNotifier {
       _timeRemaining =
           (_timeRemaining - 10).clamp(0, _activePuzzle!.timeLimitSec);
       _activeSession!.wrongHighlights++;
-      HintEngine.instance.recordWrong(_activeSession!.sessionId);
       await DatabaseHelper.instance.updateSession(_activeSession!);
     }
 
@@ -278,7 +284,36 @@ class GameProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  //End session 
+  //Level progression
+
+  void completeLevel(String code) {
+    _completedLevelCodes = [..._completedLevelCodes, code];
+    _levelComplete = true;
+    // Save stats when last level is completed
+    if (_completedLevelCodes.length == totalLevels) {
+      _activeSession?.endTime = DateTime.now();
+      _activeSession?.isCompleted = true;
+      _activeSession?.score = _activeSession!
+          .calculateScore(_activePuzzle?.timeLimitSec ?? 600);
+      if (_activeSession != null) {
+        DatabaseHelper.instance.updateSession(_activeSession!);
+      }
+      loadLeaderboard();
+      loadAchievements();
+    }
+    notifyListeners();
+  }
+
+  void goToNextLevel() {
+    if (_currentLevel < totalLevels) {
+      _currentLevel++;
+      _levelComplete = false;
+      _levelStartTime = DateTime.now();
+      notifyListeners();
+    }
+  }
+
+  // End session
 
   Future<void> _endSession({required bool won}) async {
     if (_activeSession == null || _activePuzzle == null) return;
@@ -315,30 +350,6 @@ class GameProvider extends ChangeNotifier {
   Future<void> loadAchievements() async {
     _achievements = await DatabaseHelper.instance.getAllAchievements();
     notifyListeners();
-  }
- 
-  void completeLevel(String code) {
-    _completedLevelCodes = [..._completedLevelCodes, code];
-    _levelComplete = true;
-    // Save end time when last level is completed
-    if (_completedLevelCodes.length == totalLevels) {
-      _activeSession?.endTime = DateTime.now();
-      _activeSession?.isCompleted = true;
-      _activeSession?.score = _activeSession!.calculateScore(
-          _activePuzzle?.timeLimitSec ?? 600);
-      if (_activeSession != null) {
-        DatabaseHelper.instance.updateSession(_activeSession!);
-      }
-    }
-    notifyListeners();
-  }
-
-  void goToNextLevel() {
-    if (_currentLevel < totalLevels) {
-      _currentLevel++;
-      _levelComplete = false;
-      notifyListeners();
-    }
   }
 
   @override
