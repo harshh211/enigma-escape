@@ -1,6 +1,6 @@
-// lib/widgets/timer_widget.dart
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/game_provider.dart';
 import '../utils/app_theme.dart';
 
 class TimerWidget extends StatelessWidget {
@@ -50,6 +50,60 @@ class TimerWidget extends StatelessWidget {
               fontWeight: FontWeight.bold,
               color: color,
               fontFeatures: const [FontFeature.tabularFigures()],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+class LevelTimerBar extends StatelessWidget {
+  const LevelTimerBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final game = context.watch<GameProvider>();
+    final seconds = game.timeRemaining;
+    final total = game.activePuzzle?.timeLimitSec ?? 600;
+    final progress = (seconds / total).clamp(0.0, 1.0);
+    final isLow = seconds < 60;
+    final isCritical = seconds < 30;
+    final m = (seconds ~/ 60).toString().padLeft(2, '0');
+    final s = (seconds % 60).toString().padLeft(2, '0');
+
+    final color = isCritical
+        ? AppColors.error
+        : isLow
+            ? AppColors.primary
+            : AppColors.success;
+
+    return Container(
+      color: AppColors.surface,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: [
+          Icon(Icons.timer, size: 14, color: color),
+          const SizedBox(width: 6),
+          Text(
+            '$m:$s',
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: progress,
+                backgroundColor: AppColors.surfaceLight,
+                valueColor: AlwaysStoppedAnimation(color),
+                minHeight: 6,
+              ),
             ),
           ),
         ],
