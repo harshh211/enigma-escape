@@ -2,7 +2,7 @@
   {
     "id": "puzzle_001",
     "title": "The Vanishing Curator",
-    "description": "Late at night, the city museum received a distress call. A priceless golden artifact the Eye of Horus has vanished from the east wing. The security footage shows a figure in an ALARM disabling uniform entering through the VAULT room at exactly midnight. A GUARD log confirms the unauthorized entry. Witnesses report seeing a red LASER tripwire being cut near the exhibit. The suspect managed to ESCAPE through the back corridor. Your team has been called in to decode the hidden message left behind and catch the culprit before they leave the city.",
+    "description": "Late at night, the city museum got an emergency call. A very valuable golden item called the Eye of Horus has been stolen from the east wing. Security cameras show someone desabling the ALARM and entering the VAULT room at exactly midnight. A GUARD log also confirms that someone entered without permission. Some people said they saw a red LASER tripwire being cut near the display. The suspect then ESCAPE through the back corridor. Your team has been called to figure out the hidden message left behind and catch the thief before they leave the city.",
     "difficulty": "easy",
     "time_limit_sec": 600,
     "chapter_id": 1,
@@ -57,7 +57,7 @@
       ],
       "words": ["VAULT","ALARM","GUARD","LASER","ESCAPE"],
       "correct_sequence": ["VAULT","ALARM","GUARD","LASER","ESCAPE"],
-      "passphrase": "VAGLE",
+      "passphrase": "V.A.G.L.E.",
       "hint_starts": [
         {"word":"VAULT","row":0,"col":0,"direction":"right"},
         {"word":"ALARM","row":0,"col":7,"direction":"down"},
@@ -70,7 +70,7 @@
       "grid_size": 6,
       "colors": ["red","blue","green","yellow"],
       "moves_allowed": 20,
-      "code": "CC1"
+      "code": "LOCK"
     },
     "interrogation": {
       "questions": [
@@ -91,7 +91,7 @@
         },
         {
           "question": "What was the code you found in Level 1?",
-          "options": ["EAGLE", "VAGLE", "GLEVA", "AGVEL"],
+          "options": ["E.A.G.L.E.", "V.A.G.L.E.", "G.L.E.V.A.", "A.G.V.E.L."],
           "correct": 1
         },
         {
@@ -100,22 +100,29 @@
           "correct": 2
         }
       ],
-      "code": "IR1"
+      "code": "VAULT"
     },
     "memory_grid": {
       "grid_size": 4,
       "sequence_length": 5,
       "sequence": [0, 3, 7, 12, 5],
-      "code": "MG1"
+      "code": "TRACKS"
     },
     "decode_map": {
       "pieces": 4,
       "correct_order": [2, 1, 4, 3],
       "piece_labels": ["East Wing", "Main Hall", "Exit Route", "Vault Room"],
-      "code": "DM1"
+      "code": "HORUS"
     },
-    "final_passphrase": "VAGLE-CC1-IR1-MG1-DM1",
-    "story_reveal": "The curator staged the theft for insurance money. The passphrase VAGLE was his initials — Victor A. Greene, Larceny Expert. Case closed.",
+    "final_passphrase": "VAGLE-LOCK-VAULT-TRACK-HORUS",
+    "story_reveal": "The curator staged the theft for insurance money. The passphrase VAGLE was his own initials — Victor A. Greene, Larceny Expert. The Eye of Horus was never truly lost. It was hidden in his private office all along. Case closed.",
+    "chapter_reveals": [
+      "The hidden words have finally been decoded: VAULT, ALARM, GUARD, LASER, ESCAPE. These were not random clues, they were placed on purpose. Each word points to a step in the theft, almost like the thief wanted investigators to follow their path. It becomes clear that this was carefully planned, not a quick or careless crime. Someone wanted to be found, or at least wanted to leave behind a challenge.",
+      "As the investigation continues, the team discovers that the museum's security system was not simply turned off, it was skillfully altered. The wires were rerouted with extreme precision. There were no broken locks, no damaged panels, and no signs of struggle. This level of control shows that the thief had studied the museum's electrical systems and layout for weeks, maybe even months. This was the work of someone patient, skilled, and very familiar with the building.",
+      "When the suspect is questioned, their answers begin to reveal too much. They seem to know details that only an insider would know like the exact timing of the unauthorized entry at midnight, how the ALARM system works, and how to access the VAULT without raising suspicion. The evidence starts pointing in a clear direction: this was not an outsider. The thief is likely someone who works inside the museum.",
+      "As more clues are connected, the team uncovers a clear pattern. The thief didn't move randomly, they followed a specific route through the museum, avoiding cameras and security points in a way that only senior staff would understand. This pattern confirms the suspicion that the criminal had deep knowledge of internal operations. The list of suspects becomes smaller, and the pressure builds as the team gets closer to the truth.",
+      "Finally, everything comes together. The truth is shocking, the curator himself planned the entire theft. He staged it to claim insurance money. The strange passphrase “V.A.G.L.E.” turns out to be a hidden clue using his own name: Victor A. Greene, Larceny Expert. The so-called stolen artifact, the Eye of Horus, was never actually taken out of the museum. It had been hidden in the curator's private office the whole time."
+],
     "achievement": { "id": "ach_001", "name": "Museum Detective", "description": "Solved The Vanishing Curator" }
   },
   {
