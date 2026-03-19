@@ -14,30 +14,7 @@ class InterrogationScreen extends StatefulWidget {
   State<InterrogationScreen> createState() => _InterrogationScreenState();
 }
 void _confirmBack(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: const Text('Return to briefing?',
-            style: TextStyle(color: AppColors.textPrimary)),
-        content: const Text('Your level progress will be lost.',
-            style: TextStyle(color: AppColors.textSecondary)),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('STAY',
-                  style: TextStyle(color: AppColors.accent))),
-          TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                Navigator.pushNamedAndRemoveUntil(
-                    context, '/mission', (_) => false);
-              },
-              child: const Text('GO BACK',
-                  style: TextStyle(color: AppColors.error))),
-        ],
-      ),
-    );
+    Navigator.pushNamed(context, '/mission');
   }
 class _InterrogationScreenState extends State<InterrogationScreen> {
   int _currentQuestion = 0;
