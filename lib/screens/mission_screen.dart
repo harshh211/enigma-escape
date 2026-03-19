@@ -196,8 +196,12 @@ class _BriefingBody extends StatelessWidget {
               }
             },
             icon: const Icon(Icons.play_arrow, size: 22),
-            label: const Text('BEGIN LEVEL 1',
-                style: TextStyle(fontSize: 16, letterSpacing: 1)),
+            label: Text(
+              context.watch<GameProvider>().currentLevel > 1
+                  ? 'CONTINUE — LEVEL ${context.watch<GameProvider>().currentLevel}'
+                  : 'BEGIN LEVEL 1',
+              style: const TextStyle(fontSize: 16, letterSpacing: 1),
+            ),
           ),
         ),
           const SizedBox(height: 12),
