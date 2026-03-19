@@ -74,6 +74,7 @@ class _LevelCompleteBanner extends StatelessWidget {
 
                 
                 Container(
+                  Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 20, vertical: 16),
                   decoration: BoxDecoration(
@@ -97,6 +98,50 @@ class _LevelCompleteBanner extends StatelessWidget {
                             letterSpacing: 6)),
                   ]),
                 ),
+                const SizedBox(height: 16),
+
+                // Chapter reveal
+                Builder(builder: (context) {
+                  final puzzle = context.read<GameProvider>().activePuzzle;
+                  final reveals = puzzle?.chapterReveals ?? [];
+                  final chapterText = reveals.length >= level
+                      ? reveals[level - 1]
+                      : '';
+                  if (chapterText.isEmpty) return const SizedBox.shrink();
+                  return Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceLight,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                          color: AppColors.primary.withOpacity(0.3)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(children: [
+                          const Icon(Icons.auto_stories,
+                              color: AppColors.primary, size: 14),
+                          const SizedBox(width: 6),
+                          Text('CHAPTER $level',
+                              style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontSize: 10,
+                                  letterSpacing: 1.5,
+                                  fontWeight: FontWeight.bold)),
+                        ]),
+                        const SizedBox(height: 8),
+                        Text(chapterText,
+                            style: const TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 13,
+                                height: 1.6,
+                                fontStyle: FontStyle.italic)),
+                      ],
+                    ),
+                  );
+                }),
                 const SizedBox(height: 12),
 
                 
@@ -127,7 +172,7 @@ class _LevelCompleteBanner extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-
+                  
                 
                 if (context.read<GameProvider>().completedLevelCodes.length > 1)
                   Wrap(
