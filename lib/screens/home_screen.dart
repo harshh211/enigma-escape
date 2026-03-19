@@ -259,8 +259,7 @@ class _MissionSelect extends StatelessWidget {
                             _StatChip(Icons.timer,
                                 '${(puzzle.timeLimitSec / 60).round()} min'),
                             _StatChip(Icons.layers, '5 Levels'),
-                            _StatChip(Icons.star,
-                                puzzle.difficulty.toUpperCase()),
+                            
                           ],
                         ),
                         const SizedBox(height: 16),
