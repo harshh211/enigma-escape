@@ -1,3 +1,5 @@
+// lib/screens/level_router_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
@@ -24,17 +26,14 @@ class LevelRouterScreen extends StatelessWidget {
       );
     }
 
-    return PopScope(
-      canPop: false,
-      child: switch (level) {
-        1 => const WordSearchScreen(embedded: true),
-        2 => const ColorCascadeScreen(),
-        3 => const InterrogationScreen(),
-        4 => const MemoryGridScreen(),
-        5 => const DecodeMapScreen(),
-        _ => const WordSearchScreen(embedded: true),
-      },
-    );
+    return switch (level) {
+      1 => const WordSearchScreen(embedded: true),
+      2 => const ColorCascadeScreen(),
+      3 => const InterrogationScreen(),
+      4 => const MemoryGridScreen(),
+      5 => const DecodeMapScreen(),
+      _ => const WordSearchScreen(embedded: true),
+    };
   }
 }
 
@@ -51,6 +50,11 @@ class _LevelCompleteBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final game = context.read<GameProvider>();
+    final puzzle = game.activePuzzle;
+    final reveals = puzzle?.chapterReveals ?? [];
+    final chapterText = reveals.length >= level ? reveals[level - 1] : '';
+
     return Scaffold(
       body: SafeArea(
         child: Center(
@@ -72,9 +76,8 @@ class _LevelCompleteBanner extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
 
-                
+                // Code box
                 Container(
-                  Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 20, vertical: 16),
                   decoration: BoxDecoration(
@@ -101,14 +104,8 @@ class _LevelCompleteBanner extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 // Chapter reveal
-                Builder(builder: (context) {
-                  final puzzle = context.read<GameProvider>().activePuzzle;
-                  final reveals = puzzle?.chapterReveals ?? [];
-                  final chapterText = reveals.length >= level
-                      ? reveals[level - 1]
-                      : '';
-                  if (chapterText.isEmpty) return const SizedBox.shrink();
-                  return Container(
+                if (chapterText.isNotEmpty)
+                  Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -140,11 +137,10 @@ class _LevelCompleteBanner extends StatelessWidget {
                                 fontStyle: FontStyle.italic)),
                       ],
                     ),
-                  );
-                }),
+                  ),
                 const SizedBox(height: 12),
 
-                
+                // Remember this code warning
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
@@ -172,15 +168,13 @@ class _LevelCompleteBanner extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
-                  
-                
-                if (context.read<GameProvider>().completedLevelCodes.length > 1)
+
+                // All collected codes so far
+                if (game.completedLevelCodes.length > 1)
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: context
-                        .read<GameProvider>()
-                        .completedLevelCodes
+                    children: game.completedLevelCodes
                         .map((c) => Chip(
                               label: Text(c,
                                   style: const TextStyle(
@@ -195,15 +189,15 @@ class _LevelCompleteBanner extends StatelessWidget {
                 const SizedBox(height: 32),
 
                 if (isLastLevel) ...[
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () => Navigator.pushNamedAndRemoveUntil(
-                            context, '/story', (_) => false),
-                        icon: const Icon(Icons.auto_stories),
-                        label: const Text('REVEAL THE STORY'),
-                      ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () => Navigator.pushNamedAndRemoveUntil(
+                          context, '/story', (_) => false),
+                      icon: const Icon(Icons.auto_stories),
+                      label: const Text('REVEAL THE STORY'),
                     ),
+                  ),
                 ] else ...[
                   SizedBox(
                     width: double.infinity,
@@ -216,7 +210,7 @@ class _LevelCompleteBanner extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Next: ${context.read<GameProvider>().activePuzzle?.levels[level].title ?? ""}',
+                    'Next: ${puzzle?.levels[level].title ?? ""}',
                     style: const TextStyle(
                         color: AppColors.textSecondary, fontSize: 13),
                   ),
