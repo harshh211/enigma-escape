@@ -29,11 +29,11 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
   Timer? _hintTimer;
 
   final List<String> _hints = [
-    'Read the mission briefing carefully — the answer is right there.',
+    'Read the mission briefing carefully, the answer is right there.',
     'Think about security systems, which one makes the loudest noise?',
     'What do we call 12:00 at night?',
     'Think back to Level 1, what was the first letter of the passphrase you found?',
-    'Remember the colors you connected in Level 2 This color looks like red?',
+    'Remember the colors you connected in Level 2 This color looks like red',
   ];
 
   @override

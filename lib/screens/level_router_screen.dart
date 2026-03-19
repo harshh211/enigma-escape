@@ -140,35 +140,6 @@ class _LevelCompleteBanner extends StatelessWidget {
                   ),
                 const SizedBox(height: 12),
 
-                // Remember this code warning
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.accent.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                        color: AppColors.accent.withOpacity(0.3)),
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.warning_amber,
-                          color: AppColors.accent, size: 16),
-                      SizedBox(width: 8),
-                      Text(
-                        'Remember this code!\nYou will need it later.',
-                        style: TextStyle(
-                            color: AppColors.accent,
-                            fontSize: 13,
-                            fontStyle: FontStyle.italic),
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-
                 // All collected codes so far
                 if (game.completedLevelCodes.length > 1)
                   Wrap(
@@ -195,7 +166,7 @@ class _LevelCompleteBanner extends StatelessWidget {
                       onPressed: () => Navigator.pushNamedAndRemoveUntil(
                           context, '/story', (_) => false),
                       icon: const Icon(Icons.auto_stories),
-                      label: const Text('REVEAL THE STORY'),
+                      label: const Text('CONTINUE'),
                     ),
                   ),
                 ] else ...[
