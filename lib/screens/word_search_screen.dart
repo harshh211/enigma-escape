@@ -1,3 +1,6 @@
+// lib/screens/word_search_screen.dart
+
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
@@ -6,9 +9,188 @@ import '../utils/word_search_solver.dart';
 import '../widgets/hint_overlay.dart';
 import '../widgets/timer_widget.dart';
 
-class WordSearchScreen extends StatelessWidget {
+class WordSearchScreen extends StatefulWidget {
   final bool embedded;
   const WordSearchScreen({super.key, this.embedded = false});
+
+  @override
+  State<WordSearchScreen> createState() => _WordSearchScreenState();
+}
+
+class _WordSearchScreenState extends State<WordSearchScreen> {
+  Timer? _hintTimer;
+  int _hintCountdown = 60;
+  bool _hintShown = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _startHintTimer();
+  }
+
+  @override
+  void dispose() {
+    _hintTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startHintTimer() {
+    _hintTimer?.cancel();
+    setState(() {
+      _hintCountdown = 60;
+      _hintShown = false;
+    });
+    _hintTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) { _hintTimer?.cancel(); return; }
+      setState(() {
+        if (_hintCountdown > 0) {
+          _hintCountdown--;
+        } else {
+          _hintTimer?.cancel();
+          if (!_hintShown) {
+            _hintShown = true;
+            _showAutoHint();
+          }
+        }
+      });
+    });
+  }
+
+  void _showAutoHint() {
+    final game = context.read<GameProvider>();
+    final ws = game.activePuzzle?.wordsearch;
+    if (ws == null) return;
+
+    final remaining = ws.words
+        .where((w) => !game.foundWords.contains(w.toUpperCase()))
+        .toList();
+
+    final hintText = remaining.isEmpty
+        ? 'You have found all the words!'
+        : remaining.map((w) => '$w is there').join(', ') + '.';
+
+    _showHintDialog(
+      title: 'WORD SEARCH HINT',
+      icon: Icons.search,
+      text: hintText,
+      reason: 'You have been on this level for 60 seconds.',
+    );
+  }
+
+  void _showHintDialog({
+    required String title,
+    required IconData icon,
+    required String text,
+    required String reason,
+  }) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              Icon(icon, color: AppColors.primary, size: 20),
+              const SizedBox(width: 8),
+              Text(title,
+                  style: const TextStyle(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      letterSpacing: 1)),
+            ]),
+            const SizedBox(height: 4),
+            const Text('AI GAME MASTER',
+                style: TextStyle(
+                    color: AppColors.textSecondary,
+                    fontSize: 10,
+                    letterSpacing: 1.5)),
+            const SizedBox(height: 16),
+            Text(text,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 15,
+                    height: 1.5)),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(reason,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic)),
+            ),
+            const SizedBox(height: 20),
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              _FeedbackBtn(
+                icon: Icons.thumb_up_alt_outlined,
+                label: 'Helpful',
+                color: AppColors.success,
+                onTap: () {
+                  Navigator.pop(context);
+                  _startHintTimer();
+                },
+              ),
+              const SizedBox(width: 14),
+              _FeedbackBtn(
+                icon: Icons.thumb_down_alt_outlined,
+                label: 'Not helpful',
+                color: AppColors.error,
+                onTap: () {
+                  Navigator.pop(context);
+                  _startHintTimer();
+                },
+              ),
+            ]),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showHintPassage(BuildContext context, List<String> words) {
+    final passage =
+        context.read<GameProvider>().activePuzzle!.description;
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20)),
+        title: const Row(children: [
+          Icon(Icons.lightbulb, color: AppColors.primary, size: 20),
+          SizedBox(width: 8),
+          Text('PASSAGE HINT',
+              style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold)),
+        ]),
+        content: SingleChildScrollView(
+          child: _HighlightedPassage(
+              passage: passage, words: words),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CLOSE',
+                style: TextStyle(color: AppColors.accent)),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +216,8 @@ class WordSearchScreen extends StatelessWidget {
             automaticallyImplyLeading: false,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
-              onPressed: () => _confirmBack(context),
+              onPressed: () =>
+                  Navigator.pushNamed(context, '/mission'),
             ),
             actions: [
               Center(
@@ -54,12 +237,50 @@ class WordSearchScreen extends StatelessWidget {
             children: [
               const LevelTimerBar(),
 
+              // AI Hint countdown bar
+              Container(
+                color: AppColors.surface,
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16, vertical: 8),
+                child: Row(children: [
+                  const Icon(Icons.psychology,
+                      color: AppColors.accent, size: 14),
+                  const SizedBox(width: 6),
+                  Text(
+                    _hintCountdown > 0
+                        ? '🤖 AI Hint in ${_hintCountdown}s'
+                        : '🤖 AI Hint ready!',
+                    style: TextStyle(
+                        color: _hintCountdown <= 10
+                            ? AppColors.accent
+                            : AppColors.textSecondary,
+                        fontSize: 12,
+                        fontWeight: _hintCountdown <= 10
+                            ? FontWeight.bold
+                            : FontWeight.normal),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: (60 - _hintCountdown) / 60,
+                        backgroundColor: AppColors.surfaceLight,
+                        valueColor: const AlwaysStoppedAnimation(
+                            AppColors.accent),
+                        minHeight: 4,
+                      ),
+                    ),
+                  ),
+                ]),
+              ),
+
               // Instruction bar
               Container(
                 width: double.infinity,
                 color: AppColors.surface,
                 padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 10),
+                    horizontal: 16, vertical: 8),
                 child: const Text(
                   'Find the 5 hidden words in the grid.',
                   style: TextStyle(
@@ -87,20 +308,14 @@ class WordSearchScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
                 child: Column(children: [
-                  // Hint button
-                    SizedBox(
+                  SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: game.hintAvailable
-                          ? () => _showHintPassage(context, ws.words)
-                          : null,
+                      onPressed: () =>
+                          _showHintPassage(context, ws.words),
                       icon: const Icon(Icons.lightbulb_outline,
                           size: 16),
-                      label: game.hintAvailable
-                          ? const Text('HINT — VIEW PASSAGE')
-                          : Text(
-                              'HINT AVAILABLE IN ${game.hintCooldownRemaining}s',
-                            ),
+                      label: const Text('VIEW PASSAGE HINT'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.primary,
                         side: BorderSide(
@@ -141,46 +356,9 @@ class WordSearchScreen extends StatelessWidget {
       ],
     );
   }
-  void _confirmBack(BuildContext context) {
-    Navigator.pushNamed(context, '/mission');
-  }
-  void _showHintPassage(BuildContext context, List<String> words) {
-    context.read<GameProvider>().activeSession?.hintsUsed++;
-    final passage =
-        context.read<GameProvider>().activePuzzle!.description;
-
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20)),
-        title: const Row(children: [
-          Icon(Icons.lightbulb, color: AppColors.primary, size: 20),
-          SizedBox(width: 8),
-          Text('PASSAGE HINT',
-              style: TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold)),
-        ]),
-        content: SingleChildScrollView(
-          child: _HighlightedPassage(
-              passage: passage, words: words),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('CLOSE',
-                style: TextStyle(color: AppColors.accent)),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
-
+// ── Grid widget ────────────────────────────────────────────────────────────────
 class _Grid extends StatelessWidget {
   final List<List<String>> grid;
   final int size;
@@ -259,7 +437,7 @@ class _Grid extends StatelessWidget {
   }
 }
 
-
+// ── Highlighted passage widget ─────────────────────────────────────────────────
 class _HighlightedPassage extends StatelessWidget {
   final String passage;
   final List<String> words;
@@ -273,7 +451,6 @@ class _HighlightedPassage extends StatelessWidget {
     final upper = passage.toUpperCase();
     int current = 0;
 
-    
     final List<_WordPos> positions = [];
     for (final word in words) {
       int idx = upper.indexOf(word.toUpperCase());
@@ -284,7 +461,6 @@ class _HighlightedPassage extends StatelessWidget {
     }
     positions.sort((a, b) => a.start.compareTo(b.start));
 
-    
     final List<_WordPos> clean = [];
     for (final p in positions) {
       if (clean.isEmpty || p.start >= clean.last.end) {
@@ -292,7 +468,6 @@ class _HighlightedPassage extends StatelessWidget {
       }
     }
 
-    
     for (final pos in clean) {
       if (current < pos.start) {
         spans.add(TextSpan(
@@ -335,4 +510,39 @@ class _WordPos {
   final int end;
   final String word;
   _WordPos(this.start, this.end, this.word);
+}
+
+class _FeedbackBtn extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+  const _FeedbackBtn(
+      {required this.icon,
+      required this.label,
+      required this.color,
+      required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+              horizontal: 16, vertical: 10),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: color.withOpacity(0.4)),
+          ),
+          child: Row(mainAxisSize: MainAxisSize.min, children: [
+            Icon(icon, color: color, size: 17),
+            const SizedBox(width: 6),
+            Text(label,
+                style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13)),
+          ]),
+        ),
+      );
 }
