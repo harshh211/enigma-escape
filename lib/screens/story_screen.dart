@@ -69,10 +69,10 @@ class StoryScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Row(children: [
-                      Icon(Icons.auto_stories,
+                      Icon(Icons.gavel,
                           color: AppColors.accent, size: 18),
                       SizedBox(width: 8),
-                      Text('THE FULL STORY',
+                      Text('CASE CLOSED',
                           style: TextStyle(
                               color: AppColors.accent,
                               fontSize: 11,
@@ -81,7 +81,8 @@ class StoryScreen extends StatelessWidget {
                     ]),
                     const SizedBox(height: 14),
                     Text(
-                      puzzle?.storyReveal ?? '',
+                      'Outstanding work, detective! Thanks to your team, the curator Victor A. Greene has been arrested and handed over to the authorities. The Eye of Horus has been recovered from his private office and returned safely to the museum. Justice has been served. The city is safe once again.',
+
                       style: const TextStyle(
                           color: AppColors.textPrimary,
                           fontSize: 15,
