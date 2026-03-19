@@ -329,14 +329,26 @@ class _MissionSelect extends StatelessWidget {
             const SizedBox(height: 20),
 
             // Leaderboard button
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () =>
-                    Navigator.pushNamed(context, '/leaderboard'),
-                icon: const Icon(Icons.leaderboard, size: 18),
-                label: const Text('VIEW LEADERBOARD'),
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () =>
+                        Navigator.pushNamed(context, '/leaderboard'),
+                    icon: const Icon(Icons.leaderboard, size: 16),
+                    label: const Text('LEADERBOARD'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () =>
+                        Navigator.pushNamed(context, '/achievements'),
+                    icon: const Icon(Icons.emoji_events, size: 16),
+                    label: const Text('ACHIEVEMENTS'),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
