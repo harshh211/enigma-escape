@@ -294,9 +294,24 @@ class GameProvider extends ChangeNotifier {
 
   //Level progression
 
-  void completeLevel(String code) {
+   void completeLevel(String code) {
     _completedLevelCodes = [..._completedLevelCodes, code];
     _levelComplete = true;
+
+    // Unlock level achievement
+    final levelAchs = _activePuzzle?.levelAchievements ?? [];
+    final levelIdx = _completedLevelCodes.length - 1;
+    if (levelIdx < levelAchs.length) {
+      final ach = levelAchs[levelIdx];
+      DatabaseHelper.instance.isAchievementUnlocked(ach.id).then((done) {
+        if (!done) {
+          DatabaseHelper.instance.unlockAchievement(ach.id).then((_) {
+            loadAchievements();
+          });
+        }
+      });
+    }
+
     // Save stats when last level is completed
     if (_completedLevelCodes.length == totalLevels) {
       _activeSession?.endTime = DateTime.now();

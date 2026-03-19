@@ -3,7 +3,6 @@
     "id": "puzzle_001",
     "title": "The Vanishing Curator",
     "description": "Late at night, the city museum got an emergency call. A very valuable golden item called the Eye of Horus has been stolen from the east wing. Security cameras show someone desabling the ALARM and entering the VAULT room at exactly midnight. A GUARD log also confirms that someone entered without permission. Some people said they saw a red LASER tripwire being cut near the display. The suspect then ESCAPE through the back corridor. Your team has been called to figure out the hidden message left behind and catch the thief before they leave the city.",
-    "difficulty": "easy",
     "time_limit_sec": 300,
     "chapter_id": 1,
     "levels": [
@@ -122,6 +121,13 @@
       "As more clues are connected, the team uncovers a clear pattern. The thief didn't move randomly, they followed a specific route through the museum, avoiding cameras and security points in a way that only senior staff would understand. This pattern confirms the suspicion that the criminal had deep knowledge of internal operations. The list of suspects becomes smaller, and the pressure builds as the team gets closer to the truth.",
       "Finally, everything comes together. The truth is shocking, the curator himself planned the entire theft. He staged it to claim insurance money. The strange passphrase “V.A.G.L.E.” turns out to be a hidden clue using his own name: Victor A. Greene, Larceny Expert. The so called stolen artifact, the Eye of Horus, was never actually taken out of the museum. It had been hidden in the curator's private office the whole time."
     ],
-    "achievement": { "id": "ach_001", "name": "Museum Detective", "description": "Solved The Vanishing Curator" }
+    "achievement": { "id": "ach_001", "name": "Museum Detective", "description": "Solved The Vanishing Curator" },
+    "level_achievements": [
+      { "id": "lach_001", "name": "Word Hunter", "description": "Decoded the hidden words in Level 1" },
+      { "id": "lach_002", "name": "Wire Expert", "description": "Connected all wires correctly in Level 2" },
+      { "id": "lach_003", "name": "Interrogator", "description": "Answered all questions correctly in Level 3" },
+      { "id": "lach_004", "name": "Memory Master", "description": "Memorized and repeated the sequence in Level 4" },
+      { "id": "lach_005", "name": "Lock Breaker", "description": "Cracked the final lock in Level 5" }
+    ]
   }
 ]

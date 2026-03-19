@@ -28,6 +28,9 @@ class PuzzleService {
 
     for (final p in _puzzles) {
       await DatabaseHelper.instance.insertAchievementIfNew(p.achievement, p.id);
+      for (final a in p.levelAchievements) {
+        await DatabaseHelper.instance.insertAchievementIfNew(a, p.id);
+      }
       await _seedHints(p);
     }
   }

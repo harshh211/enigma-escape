@@ -233,6 +233,7 @@ class Puzzle {
   final String storyReveal;
   final List<String> chapterReveals;
   final Achievement achievement;
+  final List<Achievement> levelAchievements;
 
   Puzzle({
     required this.id,
@@ -252,6 +253,7 @@ class Puzzle {
     required this.storyReveal,
     required this.chapterReveals,
     required this.achievement,
+     required this.levelAchievements,
   });
 
   factory Puzzle.fromJson(Map<String, dynamic> j) => Puzzle(
@@ -276,5 +278,8 @@ class Puzzle {
         storyReveal: j['story_reveal'] as String? ?? '',
         chapterReveals: List<String>.from(j['chapter_reveals'] as List? ?? []),
         achievement: Achievement.fromJson(j['achievement'] as Map<String, dynamic>),
+        levelAchievements: (j['level_achievements'] as List<dynamic>? ?? [])
+            .map((a) => Achievement.fromJson(a as Map<String, dynamic>))
+            .toList(),
       );
 }
