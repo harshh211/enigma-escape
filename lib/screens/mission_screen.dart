@@ -114,8 +114,6 @@ class _BriefingBody extends StatelessWidget {
             children: [
               _InfoBox(Icons.timer, '$mins MIN', 'TIME LIMIT'),
               _InfoBox(Icons.layers, '5', 'LEVELS'),
-              _InfoBox(Icons.star,
-                  puzzle.difficulty.toUpperCase(), 'DIFFICULTY'),
             ],
           ),
           const SizedBox(height: 28),

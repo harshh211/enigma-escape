@@ -18,6 +18,11 @@ class LevelRouterScreen extends StatelessWidget {
     final game = context.watch<GameProvider>();
     final level = game.currentLevel;
 
+    // Time ran out
+    if (game.timedOut) {
+      return _TimesUpScreen();
+    }
+
     if (game.levelComplete) {
       return _LevelCompleteBanner(
         level: level,
@@ -186,6 +191,77 @@ class _LevelCompleteBanner extends StatelessWidget {
                         color: AppColors.textSecondary, fontSize: 13),
                   ),
                 ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+class _TimesUpScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.timer_off,
+                    color: AppColors.error, size: 90),
+                const SizedBox(height: 24),
+                const Text("TIME'S UP!",
+                    style: TextStyle(
+                        color: AppColors.error,
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1)),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceLight,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                        color: AppColors.error.withOpacity(0.3)),
+                  ),
+                  child: const Text(
+                    'The person who stole the Eye of Horus has escaped! The trail has gone cold. Your team was so close — but time ran out.',
+                    style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 15,
+                        height: 1.6,
+                        fontStyle: FontStyle.italic),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: ElevatedButton.icon(
+                    onPressed: () => Navigator.pushNamedAndRemoveUntil(
+                        context, '/mission', (_) => false),
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('TRY AGAIN',
+                        style: TextStyle(fontSize: 16, letterSpacing: 1)),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.accent),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () => Navigator.pushNamedAndRemoveUntil(
+                        context, '/', (_) => false),
+                    icon: const Icon(Icons.home, size: 18),
+                    label: const Text('BACK TO HOME'),
+                  ),
+                ),
               ],
             ),
           ),
