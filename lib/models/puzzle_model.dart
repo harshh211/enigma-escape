@@ -272,8 +272,8 @@ class Puzzle {
         interrogation: InterrogationData.fromJson(j['interrogation'] as Map<String, dynamic>),
         memoryGrid: MemoryGridData.fromJson(j['memory_grid'] as Map<String, dynamic>),
         decodeMap: DecodeMapData.fromJson(j['decode_map'] as Map<String, dynamic>),
-        finalPassphrase: j['final_passphrase'] as String,
-        storyReveal: j['story_reveal'] as String,
+        finalPassphrase: j['final_passphrase'] as String? ?? '',
+        storyReveal: j['story_reveal'] as String? ?? '',
         chapterReveals: List<String>.from(j['chapter_reveals'] as List? ?? []),
         achievement: Achievement.fromJson(j['achievement'] as Map<String, dynamic>),
       );
