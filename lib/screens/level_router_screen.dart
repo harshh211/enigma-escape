@@ -150,15 +150,15 @@ class _LevelCompleteBanner extends StatelessWidget {
                 const SizedBox(height: 32),
 
                 if (isLastLevel) ...[
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () => Navigator.pushNamedAndRemoveUntil(
-                          context, '/final', (_) => false),
-                      icon: const Icon(Icons.key),
-                      label: const Text('ENTER THE FINAL CODES'),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => Navigator.pushNamedAndRemoveUntil(
+                            context, '/story', (_) => false),
+                        icon: const Icon(Icons.auto_stories),
+                        label: const Text('REVEAL THE STORY'),
+                      ),
                     ),
-                  ),
                 ] else ...[
                   SizedBox(
                     width: double.infinity,

@@ -2,7 +2,7 @@
   {
     "id": "puzzle_001",
     "title": "The Vanishing Curator",
-    "description": "Late at night, the city museum received a distress call. A priceless golden artifact — the Eye of Horus — has vanished from the east wing. The security footage shows a figure in an ALARM-disabling uniform entering through the VAULT room at exactly midnight. A GUARD log confirms the unauthorized entry. Witnesses report seeing a red LASER tripwire being cut near the exhibit. The suspect managed to ESCAPE through the back corridor. Your team has been called in to decode the hidden message left behind and catch the culprit before they leave the city. Study this passage carefully — the answers to every question are hidden within it.",
+    "description": "Late at night, the city museum received a distress call. A priceless golden artifact the Eye of Horus has vanished from the east wing. The security footage shows a figure in an ALARM disabling uniform entering through the VAULT room at exactly midnight. A GUARD log confirms the unauthorized entry. Witnesses report seeing a red LASER tripwire being cut near the exhibit. The suspect managed to ESCAPE through the back corridor. Your team has been called in to decode the hidden message left behind and catch the culprit before they leave the city.",
     "difficulty": "easy",
     "time_limit_sec": 600,
     "chapter_id": 1,
@@ -10,8 +10,7 @@
       {
         "level": 1,
         "type": "word_search",
-        "title": "Find the Hidden Words",
-        "instruction": "Find all 5 words in order. First letters spell the code."
+        "title": "Find the Hidden Words"
       },
       {
         "level": 2,
@@ -87,7 +86,7 @@
         },
         {
           "question": "What time did the unauthorized entry happen?",
-          "options": ["12:00 PM (noon)", "12:00 AM (midnight)", "3:00 AM", "6:00 PM"],
+          "options": ["Noon", "Midnight", "Afternoon", "Morning"],
           "correct": 1
         },
         {

@@ -300,6 +300,18 @@ class GameProvider extends ChangeNotifier {
       if (_activeSession != null) {
         DatabaseHelper.instance.updateSession(_activeSession!);
       }
+      // Unlock achievement
+      if (_activePuzzle != null) {
+        DatabaseHelper.instance
+            .isAchievementUnlocked(_activePuzzle!.achievement.id)
+            .then((alreadyDone) {
+          if (!alreadyDone) {
+            DatabaseHelper.instance
+                .unlockAchievement(_activePuzzle!.achievement.id)
+                .then((_) => loadAchievements());
+          }
+        });
+      }
       loadLeaderboard();
       loadAchievements();
     }
