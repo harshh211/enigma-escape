@@ -99,7 +99,7 @@ class WordSearchScreen extends StatelessWidget {
                       label: game.hintAvailable
                           ? const Text('HINT — VIEW PASSAGE')
                           : Text(
-                              'HINT AVAILABLE IN ${60 - (game.activeSession != null ? DateTime.now().difference(game.activeSession!.startTime).inSeconds.clamp(0, 60) : 0)}s',
+                              'HINT AVAILABLE IN ${game.hintCooldownRemaining}s',
                             ),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.primary,

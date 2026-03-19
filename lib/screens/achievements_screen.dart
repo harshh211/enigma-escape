@@ -53,7 +53,7 @@ class AchievementsScreen extends StatelessWidget {
           child: all.isEmpty
               ? const Center(
                   child: Text(
-                      'Complete missions to unlock achievements!',
+                      'Complete mission to unlock achievements!',
                       style: TextStyle(
                           color: AppColors.textSecondary)))
               : ListView.separated(

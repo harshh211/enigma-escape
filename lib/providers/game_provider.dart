@@ -62,6 +62,12 @@ class GameProvider extends ChangeNotifier {
     return DateTime.now().difference(_levelStartTime!).inSeconds >= 60;
   }
 
+  int get hintCooldownRemaining {
+    if (_levelStartTime == null) return 60;
+    final elapsed = DateTime.now().difference(_levelStartTime!).inSeconds;
+    return (60 - elapsed).clamp(0, 60);
+  }
+
   bool get showHint => _showHint;
   HintResult? get pendingHint => _pendingHint;
 

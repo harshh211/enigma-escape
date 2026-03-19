@@ -123,7 +123,7 @@ class LeaderboardScreen extends StatelessWidget {
                                   '${s.hintsUsed} hints'),
                               const SizedBox(width: 10),
                               _Tag(Icons.warning_amber,
-                                  '${s.wrongHighlights} err'),
+                                  '${s.wrongHighlights} error'),
                             ]),
                           ],
                         ),
