@@ -19,7 +19,7 @@ class WordSearchScreen extends StatefulWidget {
 
 class _WordSearchScreenState extends State<WordSearchScreen> {
   Timer? _hintTimer;
-  int _hintCountdown = 60;
+  int _hintCountdown =15;
   bool _hintShown = false;
 
   @override
@@ -37,7 +37,7 @@ class _WordSearchScreenState extends State<WordSearchScreen> {
   void _startHintTimer() {
     _hintTimer?.cancel();
     setState(() {
-      _hintCountdown = 60;
+      _hintCountdown = 15;
       _hintShown = false;
     });
     _hintTimer = Timer.periodic(const Duration(seconds: 1), (_) {
@@ -67,13 +67,13 @@ class _WordSearchScreenState extends State<WordSearchScreen> {
 
     final hintText = remaining.isEmpty
         ? 'You have found all the words!'
-        : remaining.map((w) => '$w is there').join(', ') + '.';
+        : remaining.map((w) => '$w is yet to find').join(', ') + '.';
 
     _showHintDialog(
       title: 'WORD SEARCH HINT',
       icon: Icons.search,
       text: hintText,
-      reason: 'You have been on this level for 60 seconds.',
+      reason: 'You have been on this level for 15 seconds.',
     );
   }
 
@@ -264,7 +264,7 @@ class _WordSearchScreenState extends State<WordSearchScreen> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(4),
                       child: LinearProgressIndicator(
-                        value: (60 - _hintCountdown) / 60,
+                        value: (15 - _hintCountdown) / 15,
                         backgroundColor: AppColors.surfaceLight,
                         valueColor: const AlwaysStoppedAnimation(
                             AppColors.accent),
