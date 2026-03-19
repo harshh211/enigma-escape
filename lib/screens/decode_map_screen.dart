@@ -9,7 +9,32 @@ class DecodeMapScreen extends StatefulWidget {
   @override
   State<DecodeMapScreen> createState() => _DecodeMapScreenState();
 }
-
+void _confirmBack(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Return to briefing?',
+            style: TextStyle(color: AppColors.textPrimary)),
+        content: const Text('Your level progress will be lost.',
+            style: TextStyle(color: AppColors.textSecondary)),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('STAY',
+                  style: TextStyle(color: AppColors.accent))),
+          TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/mission', (_) => false);
+              },
+              child: const Text('GO BACK',
+                  style: TextStyle(color: AppColors.error))),
+        ],
+      ),
+    );
+  }
 class _DecodeMapScreenState extends State<DecodeMapScreen> {
   
   late List<String> _shuffledCodes;
@@ -72,6 +97,10 @@ class _DecodeMapScreenState extends State<DecodeMapScreen> {
       appBar: AppBar(
         title: const Text('LEVEL 5 — CRACK THE LOCK'),
         automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => _confirmBack(context),
+        ),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 12),

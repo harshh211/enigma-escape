@@ -24,14 +24,17 @@ class LevelRouterScreen extends StatelessWidget {
       );
     }
 
-    return switch (level) {
-      1 => const WordSearchScreen(embedded: true),
-      2 => const ColorCascadeScreen(),
-      3 => const InterrogationScreen(),
-      4 => const MemoryGridScreen(),
-      5 => const DecodeMapScreen(),
-      _ => const WordSearchScreen(embedded: true),
-    };
+    return PopScope(
+      canPop: false,
+      child: switch (level) {
+        1 => const WordSearchScreen(embedded: true),
+        2 => const ColorCascadeScreen(),
+        3 => const InterrogationScreen(),
+        4 => const MemoryGridScreen(),
+        5 => const DecodeMapScreen(),
+        _ => const WordSearchScreen(embedded: true),
+      },
+    );
   }
 }
 

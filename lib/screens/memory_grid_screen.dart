@@ -15,7 +15,32 @@ class MemoryGridScreen extends StatefulWidget {
   @override
   State<MemoryGridScreen> createState() => _MemoryGridScreenState();
 }
-
+void _confirmBack(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Return to briefing?',
+            style: TextStyle(color: AppColors.textPrimary)),
+        content: const Text('Your level progress will be lost.',
+            style: TextStyle(color: AppColors.textSecondary)),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('STAY',
+                  style: TextStyle(color: AppColors.accent))),
+          TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pushNamedAndRemoveUntil(
+                    context, '/mission', (_) => false);
+              },
+              child: const Text('GO BACK',
+                  style: TextStyle(color: AppColors.error))),
+        ],
+      ),
+    );
+  }
 class _MemoryGridScreenState extends State<MemoryGridScreen> {
   MemoryPhase _phase = MemoryPhase.memorize;
   List<int> _playerSequence = [];
@@ -227,6 +252,10 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
       appBar: AppBar(
         title: const Text('LEVEL 4 — MEMORY GRID'),
         automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => _confirmBack(context),
+        ),
       ),
       body: Column(
         children: [
