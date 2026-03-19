@@ -65,37 +65,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
           ),
+          
           const SizedBox(height: 20),
-
-          // Difficulty 
-          _SectionLabel('DIFFICULTY'),
-          Container(
-            decoration: _box,
-            child: Column(
-              children: [
-                _RadioTile(
-                  title: 'Easy',
-                  subtitle: '8×8 grid · 10 min timer',
-                  value: 'easy',
-                  group: game.difficulty,
-                  onChange: (v) =>
-                      context.read<GameProvider>().setDifficulty(v!),
-                ),
-                const Divider(
-                    height: 1, color: AppColors.background),
-                _RadioTile(
-                  title: 'Hard',
-                  subtitle: '12×12 grid · 8 min timer',
-                  value: 'hard',
-                  group: game.difficulty,
-                  onChange: (v) =>
-                      context.read<GameProvider>().setDifficulty(v!),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-
           // Display 
           _SectionLabel('DISPLAY'),
           Container(
