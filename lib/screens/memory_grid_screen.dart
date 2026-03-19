@@ -29,7 +29,7 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
   int _countdown = 5;
 
   // Hint cooldown
-  int _hintCountdown = 60;
+  int _hintCountdown = 30;
   bool _hintUnlocked = false;
   Timer? _hintTimer;
   bool _showingHint = false;
