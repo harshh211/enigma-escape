@@ -231,6 +231,7 @@ class Puzzle {
   final DecodeMapData decodeMap;
   final String finalPassphrase;
   final String storyReveal;
+  final List<String> chapterReveals;
   final Achievement achievement;
 
   Puzzle({
@@ -249,6 +250,7 @@ class Puzzle {
     required this.decodeMap,
     required this.finalPassphrase,
     required this.storyReveal,
+    required this.chapterReveals,
     required this.achievement,
   });
 
@@ -272,6 +274,7 @@ class Puzzle {
         decodeMap: DecodeMapData.fromJson(j['decode_map'] as Map<String, dynamic>),
         finalPassphrase: j['final_passphrase'] as String,
         storyReveal: j['story_reveal'] as String,
+        chapterReveals: List<String>.from(j['chapter_reveals'] as List? ?? []),
         achievement: Achievement.fromJson(j['achievement'] as Map<String, dynamic>),
       );
 }
