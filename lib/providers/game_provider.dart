@@ -317,7 +317,7 @@ class GameProvider extends ChangeNotifier {
       _activeSession?.endTime = DateTime.now();
       _activeSession?.isCompleted = true;
       _activeSession?.score = _activeSession!
-          .calculateScore(_activePuzzle?.timeLimitSec ?? 300);
+          .calculateScore(_activePuzzle?.timeLimitSec ?? 360);
       if (_activeSession != null) {
         DatabaseHelper.instance.updateSession(_activeSession!);
       }

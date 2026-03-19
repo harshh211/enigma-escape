@@ -261,7 +261,7 @@ class Puzzle {
         title: j['title'] as String? ?? '',
         description: j['description'] as String? ?? '',
         difficulty: j['difficulty'] as String? ?? 'easy',
-        timeLimitSec: j['time_limit_sec'] as int? ?? 300,
+        timeLimitSec: j['time_limit_sec'] as int? ?? 360,
         chapterId: j['chapter_id'] as int? ?? 1,
         levels: (j['levels'] as List<dynamic>)
             .map((l) => PuzzleLevel.fromJson(l as Map<String, dynamic>))
