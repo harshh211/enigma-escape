@@ -31,10 +31,10 @@ class PuzzleLevel {
   });
 
   factory PuzzleLevel.fromJson(Map<String, dynamic> j) => PuzzleLevel(
-        level: j['level'] as int,
-        type: j['type'] as String,
-        title: j['title'] as String,
-        instruction: j['instruction'] as String,
+        level: j['level'] as int? ?? 0,
+        type: j['type'] as String? ?? '',
+        title: j['title'] as String? ?? '',
+        instruction: j['instruction'] as String? ?? '',
       );
 }
 
