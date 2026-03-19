@@ -257,12 +257,12 @@ class Puzzle {
   });
 
   factory Puzzle.fromJson(Map<String, dynamic> j) => Puzzle(
-        id: j['id'] as String,
-        title: j['title'] as String,
-        description: j['description'] as String,
-        difficulty: j['difficulty'] as String,
-        timeLimitSec: j['time_limit_sec'] as int,
-        chapterId: j['chapter_id'] as int,
+       id: j['id'] as String? ?? '',
+        title: j['title'] as String? ?? '',
+        description: j['description'] as String? ?? '',
+        difficulty: j['difficulty'] as String? ?? 'easy',
+        timeLimitSec: j['time_limit_sec'] as int? ?? 300,
+        chapterId: j['chapter_id'] as int? ?? 1,
         levels: (j['levels'] as List<dynamic>)
             .map((l) => PuzzleLevel.fromJson(l as Map<String, dynamic>))
             .toList(),

@@ -3,6 +3,7 @@
     "id": "puzzle_001",
     "title": "The Vanishing Curator",
     "description": "Late at night, the city museum got an emergency call. A very valuable golden item called the Eye of Horus has been stolen from the east wing. Security cameras show someone desabling the ALARM and entering the VAULT room at exactly midnight. A GUARD log also confirms that someone entered without permission. Some people said they saw a red LASER tripwire being cut near the display. The suspect then ESCAPE through the back corridor. Your team has been called to figure out the hidden message left behind and catch the thief before they leave the city.",
+    "difficulty": "easy",
     "time_limit_sec": 300,
     "chapter_id": 1,
     "levels": [
