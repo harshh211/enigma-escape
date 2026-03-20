@@ -260,7 +260,7 @@ class Puzzle {
         levels: (j['levels'] as List<dynamic>)
             .map((l) => PuzzleLevel.fromJson(l as Map<String, dynamic>))
             .toList(),
-        clues: (j['clues'] as List<dynamic>)
+        clues: (j['clues'] as List<dynamic>? ?? [])
             .map((c) => Clue.fromJson(c as Map<String, dynamic>))
             .toList(),
         wordsearch: WordSearchPuzzle.fromJson(j['wordsearch'] as Map<String, dynamic>),
