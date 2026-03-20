@@ -84,7 +84,7 @@ class _NameEntry extends StatelessWidget {
                     color: AppColors.primary, size: 52),
               ),
               const SizedBox(height: 24),
-              const Text('ENIGMA ROOMS',
+              const Text('ENIGMA ESCAPE',
                   style: TextStyle(
                       color: AppColors.primary,
                       fontSize: 32,
