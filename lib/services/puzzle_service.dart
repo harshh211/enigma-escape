@@ -27,7 +27,7 @@ class PuzzleService {
     _puzzles = list.map((j) => Puzzle.fromJson(j as Map<String, dynamic>)).toList();
 
     for (final p in _puzzles) {
-      await DatabaseHelper.instance.insertAchievementIfNew(p.achievement, p.id);
+      // Only seed level achievements — not the main mission achievement
       for (final a in p.levelAchievements) {
         await DatabaseHelper.instance.insertAchievementIfNew(a, p.id);
       }

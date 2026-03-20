@@ -291,7 +291,9 @@ class GameProvider extends ChangeNotifier {
     _showHint = false;
     notifyListeners();
   }
-
+  void trackHintUsed() {
+    _activeSession?.hintsUsed++;
+  }
   //Level progression
 
    void completeLevel(String code) {
