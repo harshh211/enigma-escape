@@ -1,5 +1,3 @@
-// lib/screens/word_search_screen.dart
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -157,7 +155,8 @@ class _WordSearchScreenState extends State<WordSearchScreen> {
     );
   }
 
-  void _showHintPassage(BuildContext context, List<String> words) {
+   void _showHintPassage(BuildContext context, List<String> words) {
+    context.read<GameProvider>().activeSession?.hintsUsed++;
     final passage =
         context.read<GameProvider>().activePuzzle!.description;
     showDialog(
@@ -356,7 +355,7 @@ class _WordSearchScreenState extends State<WordSearchScreen> {
   }
 }
 
-// ── Grid widget ────────────────────────────────────────────────────────────────
+// Grid widget 
 class _Grid extends StatelessWidget {
   final List<List<String>> grid;
   final int size;
@@ -435,7 +434,7 @@ class _Grid extends StatelessWidget {
   }
 }
 
-// ── Highlighted passage widget ─────────────────────────────────────────────────
+// Highlighted passage widget 
 class _HighlightedPassage extends StatelessWidget {
   final String passage;
   final List<String> words;
@@ -476,11 +475,10 @@ class _HighlightedPassage extends StatelessWidget {
               height: 1.6),
         ));
       }
-      spans.add(TextSpan(
+       spans.add(TextSpan(
         text: passage.substring(pos.start, pos.end),
         style: const TextStyle(
-          color: AppColors.background,
-          backgroundColor: AppColors.primary,
+          color: AppColors.primary,
           fontWeight: FontWeight.bold,
           fontSize: 14,
           height: 1.6,

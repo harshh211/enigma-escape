@@ -122,7 +122,6 @@
       "As more clues are connected, the team uncovers a clear pattern. The thief didn't move randomly, they followed a specific route through the museum, avoiding cameras and security points in a way that only senior staff would understand. This pattern confirms the suspicion that the criminal had deep knowledge of internal operations. The list of suspects becomes smaller, and the pressure builds as the team gets closer to the truth.",
       "Finally, everything comes together. The truth is shocking, the curator himself planned the entire theft. He staged it to claim insurance money. The strange passphrase “V.A.G.L.E.” turns out to be a hidden clue using his own name: Victor A. Greene, Larceny Expert. The so called stolen artifact, the Eye of Horus, was never actually taken out of the museum. It had been hidden in the curator's private office the whole time."
     ],
-    "achievement": { "id": "ach_001", "name": "Museum Detective", "description": "Solved The Vanishing Curator" },
     "level_achievements": [
       { "id": "lach_001", "name": "Word Hunter", "description": "Decoded the hidden words in Level 1" },
       { "id": "lach_002", "name": "Wire Expert", "description": "Connected all wires correctly in Level 2" },

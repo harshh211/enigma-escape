@@ -1,5 +1,3 @@
-// lib/screens/interrogation_screen.dart
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -13,27 +11,24 @@ class InterrogationScreen extends StatefulWidget {
   @override
   State<InterrogationScreen> createState() => _InterrogationScreenState();
 }
-void _confirmBack(BuildContext context) {
-    Navigator.pushNamed(context, '/mission');
-  }
+
 class _InterrogationScreenState extends State<InterrogationScreen> {
   int _currentQuestion = 0;
   int? _selectedOption;
   bool _answered = false;
   bool _correct = false;
-  bool _showHintText = false;
 
-  // 15 second hint cooldown per question
   int _hintCountdown = 15;
   bool _hintUnlocked = false;
   Timer? _hintTimer;
+  bool _hintShownForThisQuestion = false;
 
   final List<String> _hints = [
-    'Read the mission briefing carefully, the answer is right there.',
+    'Read the mission briefing carefully the answer is right there.',
     'Think about security systems, which one makes the loudest noise?',
     'What do we call 12:00 at night?',
-    'Think back to Level 1, what was the first letter of the passphrase you found?',
-    'Remember the colors you connected in Level 2 This color looks like red',
+    'Think back to leVel 1,',
+    'Remember the colors you connected in Level 2. This color looks like red',
   ];
 
   @override
@@ -53,7 +48,7 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
     setState(() {
       _hintCountdown = 15;
       _hintUnlocked = false;
-      _showHintText = false;
+      _hintShownForThisQuestion = false;
     });
     _hintTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted) {
@@ -68,7 +63,116 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
           _hintTimer?.cancel();
         }
       });
+      if (_hintCountdown == 0 &&
+          !_answered &&
+          !_hintShownForThisQuestion) {
+        setState(() => _hintShownForThisQuestion = true);
+        context.read<GameProvider>().activeSession?.hintsUsed++;
+        Future.delayed(
+            const Duration(milliseconds: 100), _showHintDialog);
+      }
     });
+  }
+
+  void _showHintDialog() {
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.psychology,
+                      color: AppColors.primary, size: 20),
+                  SizedBox(width: 8),
+                  Text('AI GAME MASTER',
+                      style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          letterSpacing: 1)),
+                ]),
+            const SizedBox(height: 16),
+            Text(
+              '→  ${_hints[_currentQuestion]}',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 15,
+                  height: 1.5),
+            ),
+            const SizedBox(height: 20),
+            Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _feedbackBtn(
+                      Icons.thumb_up_alt_outlined, AppColors.success),
+                  const SizedBox(width: 14),
+                  _feedbackBtn(
+                      Icons.thumb_down_alt_outlined, AppColors.error),
+                ]),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showPassageHint(BuildContext context) {
+    context.read<GameProvider>().activeSession?.hintsUsed++;
+    final passage =
+        context.read<GameProvider>().activePuzzle!.description;
+    final words =
+        context.read<GameProvider>().activePuzzle!.wordsearch.words;
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20)),
+        title: const Row(children: [
+          Icon(Icons.lightbulb, color: AppColors.primary, size: 20),
+          SizedBox(width: 8),
+          Text('PASSAGE HINT',
+              style: TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold)),
+        ]),
+        content: SingleChildScrollView(
+          child: _PassageText(passage: passage, words: words),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CLOSE',
+                style: TextStyle(color: AppColors.accent)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _feedbackBtn(IconData icon, Color color) {
+    return GestureDetector(
+      onTap: () => Navigator.pop(context),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: color.withOpacity(0.4)),
+        ),
+        child: Icon(icon, color: color, size: 24),
+      ),
+    );
   }
 
   @override
@@ -92,10 +196,48 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
         children: [
           const LevelTimerBar(),
 
+          // AI hint countdown bar
+          Container(
+            color: AppColors.surface,
+            padding: const EdgeInsets.symmetric(
+                horizontal: 16, vertical: 8),
+            child: Row(children: [
+              const Icon(Icons.psychology,
+                  color: AppColors.accent, size: 14),
+              const SizedBox(width: 6),
+              Text(
+                _hintUnlocked
+                    ? '🤖 AI Hint ready!'
+                    : '🤖 AI Hint in ${_hintCountdown}s',
+                style: TextStyle(
+                    color: _hintCountdown <= 5
+                        ? AppColors.accent
+                        : AppColors.textSecondary,
+                    fontSize: 12,
+                    fontWeight: _hintCountdown <= 5
+                        ? FontWeight.bold
+                        : FontWeight.normal),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: (15 - _hintCountdown) / 15,
+                    backgroundColor: AppColors.surfaceLight,
+                    valueColor: const AlwaysStoppedAnimation(
+                        AppColors.accent),
+                    minHeight: 4,
+                  ),
+                ),
+              ),
+            ]),
+          ),
+
           // Progress bar
           Container(
             color: AppColors.surface,
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: LinearProgressIndicator(
@@ -162,78 +304,29 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Hint button
-                  if (!_answered)
-                    GestureDetector(
-                      onTap: _hintUnlocked
-                          ? () {
-                              if (!_showHintText) {
-                                context.read<GameProvider>().activeSession?.hintsUsed++;
-                              }
-                              setState(() => _showHintText = !_showHintText);
-                            }
-                          : null,
-                      child: Container(
+                  // Passage hint — only on question 1
+                  if (_currentQuestion == 0)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: SizedBox(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: _hintUnlocked
-                              ? AppColors.primary.withOpacity(0.08)
-                              : AppColors.surfaceLight,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                              color: _hintUnlocked
-                                  ? AppColors.primary.withOpacity(0.3)
-                                  : AppColors.textSecondary
-                                      .withOpacity(0.2)),
+                        child: OutlinedButton.icon(
+                          onPressed: () =>
+                              _showPassageHint(context),
+                          icon: const Icon(
+                              Icons.lightbulb_outline,
+                              size: 16),
+                          label:
+                              const Text('VIEW PASSAGE HINT'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            side: BorderSide(
+                                color: AppColors.primary
+                                    .withOpacity(0.4)),
+                          ),
                         ),
-                        child: Row(children: [
-                          Icon(
-                            Icons.lightbulb_outline,
-                            color: _hintUnlocked
-                                ? AppColors.primary
-                                : AppColors.textSecondary,
-                            size: 18,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _showHintText
-                                  ? _hints[_currentQuestion]
-                                  : _hintUnlocked
-                                      ? 'Tap for a hint'
-                                      : 'Hint available in ${_hintCountdown}s',
-                              style: TextStyle(
-                                  color: _showHintText
-                                      ? AppColors.primary
-                                      : _hintUnlocked
-                                          ? AppColors.textSecondary
-                                          : AppColors.textSecondary
-                                              .withOpacity(0.5),
-                                  fontSize: 13,
-                                  fontStyle: _showHintText
-                                      ? FontStyle.italic
-                                      : FontStyle.normal),
-                            ),
-                          ),
-                          if (!_hintUnlocked)
-                            SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                value: (15 - _hintCountdown) / 15,
-                                strokeWidth: 2,
-                                backgroundColor:
-                                    AppColors.surfaceLight,
-                                valueColor:
-                                    const AlwaysStoppedAnimation(
-                                        AppColors.primary),
-                              ),
-                            ),
-                        ]),
                       ),
                     ),
-                  const SizedBox(height: 16),
 
                   // Options
                   ...question.options.asMap().entries.map((e) {
@@ -247,31 +340,37 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                     if (_answered) {
                       if (idx == question.correct) {
                         borderColor = AppColors.success;
-                        bgColor = AppColors.success.withOpacity(0.12);
+                        bgColor =
+                            AppColors.success.withOpacity(0.12);
                         textColor = AppColors.success;
                       } else if (idx == _selectedOption) {
                         borderColor = AppColors.error;
-                        bgColor = AppColors.error.withOpacity(0.12);
+                        bgColor =
+                            AppColors.error.withOpacity(0.12);
                         textColor = AppColors.error;
                       }
                     } else if (idx == _selectedOption) {
                       borderColor = AppColors.primary;
-                      bgColor = AppColors.primary.withOpacity(0.1);
+                      bgColor =
+                          AppColors.primary.withOpacity(0.1);
                     }
 
                     return GestureDetector(
                       onTap: _answered
                           ? null
-                          : () =>
-                              setState(() => _selectedOption = idx),
+                          : () => setState(
+                              () => _selectedOption = idx),
                       child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
+                        duration:
+                            const Duration(milliseconds: 200),
                         margin: const EdgeInsets.only(bottom: 10),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: bgColor,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: borderColor),
+                          borderRadius:
+                              BorderRadius.circular(12),
+                          border:
+                              Border.all(color: borderColor),
                         ),
                         child: Row(
                           children: [
@@ -280,14 +379,16 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                               height: 28,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color:
-                                    _selectedOption == idx && !_answered
-                                        ? AppColors.primary
-                                        : AppColors.background,
+                                color: _selectedOption == idx &&
+                                        !_answered
+                                    ? AppColors.primary
+                                    : AppColors.background,
                                 border: Border.all(
-                                    color: _selectedOption == idx
-                                        ? AppColors.primary
-                                        : AppColors.textSecondary),
+                                    color:
+                                        _selectedOption == idx
+                                            ? AppColors.primary
+                                            : AppColors
+                                                .textSecondary),
                               ),
                               child: Center(
                                 child: Text(
@@ -295,10 +396,12 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                                   style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.bold,
-                                      color: _selectedOption == idx &&
+                                      color: _selectedOption ==
+                                                  idx &&
                                               !_answered
                                           ? AppColors.background
-                                          : AppColors.textSecondary),
+                                          : AppColors
+                                              .textSecondary),
                                 ),
                               ),
                             ),
@@ -309,14 +412,17 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                                       color: textColor,
                                       fontSize: 14)),
                             ),
-                            if (_answered && idx == question.correct)
+                            if (_answered &&
+                                idx == question.correct)
                               const Icon(Icons.check_circle,
-                                  color: AppColors.success, size: 20),
+                                  color: AppColors.success,
+                                  size: 20),
                             if (_answered &&
                                 idx == _selectedOption &&
                                 idx != question.correct)
                               const Icon(Icons.cancel,
-                                  color: AppColors.error, size: 20),
+                                  color: AppColors.error,
+                                  size: 20),
                           ],
                         ),
                       ),
@@ -330,8 +436,9 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed:
-                            _selectedOption == null ? null : _submitAnswer,
+                        onPressed: _selectedOption == null
+                            ? null
+                            : _submitAnswer,
                         child: const Text('SUBMIT ANSWER'),
                       ),
                     )
@@ -363,7 +470,6 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
     final game = context.read<GameProvider>();
     final question = game.activePuzzle!.interrogation
         .questions[_currentQuestion];
-
     final isCorrect = _selectedOption == question.correct;
 
     setState(() {
@@ -372,11 +478,9 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
     });
 
     if (!isCorrect) {
-      // Track wrong answer
       game.activeSession?.wrongHighlights++;
-      Future.delayed(const Duration(milliseconds: 400), () {
-        _showLostDialog();
-      });
+      Future.delayed(
+          const Duration(milliseconds: 400), _showLostDialog);
     }
   }
 
@@ -391,7 +495,8 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.cancel, color: AppColors.error, size: 64),
+            const Icon(Icons.cancel,
+                color: AppColors.error, size: 64),
             const SizedBox(height: 16),
             const Text('YOU LOST!',
                 style: TextStyle(
@@ -400,7 +505,7 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                     fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             const Text(
-                'Wrong answer. You must restart from the beginning.',
+                'Wrong answer. You must restart from the beginning of level 3.',
                 style: TextStyle(
                     color: AppColors.textSecondary, fontSize: 13),
                 textAlign: TextAlign.center),
@@ -414,7 +519,7 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
                       context, '/mission', (_) => false);
                 },
                 icon: const Icon(Icons.refresh),
-                label: const Text('RESTART FROM BRIEFING'),
+                label: const Text('RESTART'),
                 style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.accent),
               ),
@@ -442,4 +547,76 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
       game.completeLevel(code);
     }
   }
+
+  void _confirmBack(BuildContext context) {
+    Navigator.pushNamed(context, '/mission');
+  }
+}
+
+class _PassageText extends StatelessWidget {
+  final String passage;
+  final List<String> words;
+  const _PassageText({required this.passage, required this.words});
+
+  @override
+  Widget build(BuildContext context) {
+    final spans = <TextSpan>[];
+    final upper = passage.toUpperCase();
+    int current = 0;
+
+    final List<_Pos> positions = [];
+    for (final word in words) {
+      int idx = upper.indexOf(word.toUpperCase());
+      while (idx != -1) {
+        positions.add(_Pos(idx, idx + word.length));
+        idx = upper.indexOf(word.toUpperCase(), idx + 1);
+      }
+    }
+    positions.sort((a, b) => a.start.compareTo(b.start));
+
+    final List<_Pos> clean = [];
+    for (final p in positions) {
+      if (clean.isEmpty || p.start >= clean.last.end) clean.add(p);
+    }
+
+    for (final pos in clean) {
+      if (current < pos.start) {
+        spans.add(TextSpan(
+          text: passage.substring(current, pos.start),
+          style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 14,
+              height: 1.6),
+        ));
+      }
+      spans.add(TextSpan(
+        text: passage.substring(pos.start, pos.end),
+        style: const TextStyle(
+          color: AppColors.primary,
+          fontWeight: FontWeight.bold,
+          fontSize: 14,
+          height: 1.6,
+        ),
+      ));
+      current = pos.end;
+    }
+
+    if (current < passage.length) {
+      spans.add(TextSpan(
+        text: passage.substring(current),
+        style: const TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 14,
+            height: 1.6),
+      ));
+    }
+
+    return RichText(text: TextSpan(children: spans));
+  }
+}
+
+class _Pos {
+  final int start;
+  final int end;
+  _Pos(this.start, this.end);
 }

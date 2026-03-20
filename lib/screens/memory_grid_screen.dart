@@ -1,5 +1,3 @@
-// lib/screens/memory_grid_screen.dart
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -15,9 +13,7 @@ class MemoryGridScreen extends StatefulWidget {
   @override
   State<MemoryGridScreen> createState() => _MemoryGridScreenState();
 }
-void _confirmBack(BuildContext context) {
-    Navigator.pushNamed(context, '/mission');
-  }
+
 class _MemoryGridScreenState extends State<MemoryGridScreen> {
   MemoryPhase _phase = MemoryPhase.memorize;
   List<int> _playerSequence = [];
@@ -28,11 +24,12 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
   late int _gridSize;
   int _countdown = 5;
 
-  // Hint cooldown
-  int _hintCountdown = 30;
+  // AI hint countdown
+  int _hintCountdown = 15;
   bool _hintUnlocked = false;
   Timer? _hintTimer;
   bool _showingHint = false;
+  bool _hintShown = false;
 
   @override
   void initState() {
@@ -53,8 +50,9 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
   void _startHintTimer() {
     _hintTimer?.cancel();
     setState(() {
-      _hintCountdown = 60;
+      _hintCountdown = 15;
       _hintUnlocked = false;
+      _hintShown = false;
     });
     _hintTimer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!mounted) { _hintTimer?.cancel(); return; }
@@ -66,7 +64,84 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
           _hintTimer?.cancel();
         }
       });
+      // Auto show hint when countdown reaches 0
+      if (_hintCountdown == 0 && !_hintShown &&
+          _phase == MemoryPhase.recall) {
+        setState(() => _hintShown = true);
+        context.read<GameProvider>().activeSession?.hintsUsed++;
+        Future.delayed(const Duration(milliseconds: 100),
+            _showAutoHint);
+      }
     });
+  }
+
+  void _showAutoHint() {
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.psychology,
+                      color: AppColors.primary, size: 20),
+                  SizedBox(width: 8),
+                  Text('AI GAME MASTER',
+                      style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          letterSpacing: 1)),
+                ]),
+            const SizedBox(height: 16),
+            Text(
+              'Tap in this order:\n${_sequence.map((i) => i + 1).join(', ')}',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 16,
+                  height: 1.5,
+                  fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _feedbackBtn(
+                      Icons.thumb_up_alt_outlined, AppColors.success),
+                  const SizedBox(width: 14),
+                  _feedbackBtn(
+                      Icons.thumb_down_alt_outlined, AppColors.error),
+                ]),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _feedbackBtn(IconData icon, Color color) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pop(context);
+        _startHintTimer();
+      },
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: color.withOpacity(0.4)),
+        ),
+        child: Icon(icon, color: color, size: 24),
+      ),
+    );
   }
 
   void _showHint() {
@@ -118,7 +193,8 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
       context.read<GameProvider>().activeSession?.wrongHighlights++;
       if (_attempts >= _maxAttempts) {
         setState(() => _phase = MemoryPhase.lost);
-        Future.delayed(const Duration(milliseconds: 300), _showLostDialog);
+        Future.delayed(
+            const Duration(milliseconds: 300), _showLostDialog);
       } else {
         _showWrongDialog();
       }
@@ -127,8 +203,11 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
 
     if (newSeq.length == _sequence.length) {
       Future.delayed(const Duration(milliseconds: 400), () {
-        final code =
-            context.read<GameProvider>().activePuzzle!.memoryGrid.code;
+        final code = context
+            .read<GameProvider>()
+            .activePuzzle!
+            .memoryGrid
+            .code;
         context.read<GameProvider>().completeLevel(code);
       });
     }
@@ -223,6 +302,10 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
     );
   }
 
+  void _confirmBack(BuildContext context) {
+    Navigator.pushNamed(context, '/mission');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -238,6 +321,44 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
         children: [
           const LevelTimerBar(),
 
+          // AI hint countdown bar
+          Container(
+            color: AppColors.surface,
+            padding: const EdgeInsets.symmetric(
+                horizontal: 16, vertical: 8),
+            child: Row(children: [
+              const Icon(Icons.psychology,
+                  color: AppColors.accent, size: 14),
+              const SizedBox(width: 6),
+              Text(
+                _hintUnlocked
+                    ? '🤖 AI Hint ready!'
+                    : '🤖 AI Hint in ${_hintCountdown}s',
+                style: TextStyle(
+                    color: _hintCountdown <= 10
+                        ? AppColors.accent
+                        : AppColors.textSecondary,
+                    fontSize: 12,
+                    fontWeight: _hintCountdown <= 10
+                        ? FontWeight.bold
+                        : FontWeight.normal),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: (15 - _hintCountdown) / 15,
+                    backgroundColor: AppColors.surfaceLight,
+                    valueColor: const AlwaysStoppedAnimation(
+                        AppColors.accent),
+                    minHeight: 4,
+                  ),
+                ),
+              ),
+            ]),
+          ),
+
           // Phase banner
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
@@ -245,8 +366,8 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
             color: _phase == MemoryPhase.memorize
                 ? AppColors.primary.withOpacity(0.15)
                 : AppColors.accent.withOpacity(0.15),
-            padding:
-                const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+            padding: const EdgeInsets.symmetric(
+                vertical: 14, horizontal: 20),
             child: Column(
               children: [
                 Text(
@@ -267,12 +388,14 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                if (_phase == MemoryPhase.memorize && !_showingHint) ...[
+                if (_phase == MemoryPhase.memorize &&
+                    !_showingHint) ...[
                   const SizedBox(height: 6),
                   Text(
                     'Switching in $_countdown seconds...',
                     style: const TextStyle(
-                        color: AppColors.textSecondary, fontSize: 12),
+                        color: AppColors.textSecondary,
+                        fontSize: 12),
                   ),
                 ],
                 if (_phase == MemoryPhase.recall) ...[
@@ -280,7 +403,8 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
                   Text(
                     '${_playerSequence.length} / ${_sequence.length} tapped  ·  Attempt ${_attempts + 1} of $_maxAttempts',
                     style: const TextStyle(
-                        color: AppColors.textSecondary, fontSize: 12),
+                        color: AppColors.textSecondary,
+                        fontSize: 12),
                   ),
                 ],
               ],
@@ -295,7 +419,8 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
                 aspectRatio: 1,
                 child: GridView.builder(
                   physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate:
+                      SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: _gridSize,
                     mainAxisSpacing: 10,
                     crossAxisSpacing: 10,
@@ -308,10 +433,12 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
 
                     Color bg;
 
-                    if ((_phase == MemoryPhase.memorize || _showingHint) &&
+                    if ((_phase == MemoryPhase.memorize ||
+                            _showingHint) &&
                         isInSequence) {
                       bg = AppColors.primary.withOpacity(0.7);
-                    } else if (_phase == MemoryPhase.recall && isTapped) {
+                    } else if (_phase == MemoryPhase.recall &&
+                        isTapped) {
                       bg = AppColors.accent.withOpacity(0.6);
                     } else {
                       bg = AppColors.surfaceLight;
@@ -332,18 +459,19 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
                                 : AppColors.surface,
                             width: 2,
                           ),
-                          boxShadow: (_phase == MemoryPhase.memorize ||
-                                      _showingHint) &&
-                                  isInSequence
-                              ? [
-                                  BoxShadow(
-                                    color:
-                                        AppColors.primary.withOpacity(0.4),
-                                    blurRadius: 8,
-                                    spreadRadius: 1,
-                                  )
-                                ]
-                              : null,
+                          boxShadow:
+                              (_phase == MemoryPhase.memorize ||
+                                          _showingHint) &&
+                                      isInSequence
+                                  ? [
+                                      BoxShadow(
+                                        color: AppColors.primary
+                                            .withOpacity(0.4),
+                                        blurRadius: 8,
+                                        spreadRadius: 1,
+                                      )
+                                    ]
+                                  : null,
                         ),
                         child: (_phase == MemoryPhase.memorize ||
                                     _showingHint) &&
@@ -366,44 +494,6 @@ class _MemoryGridScreenState extends State<MemoryGridScreen> {
               ),
             ),
           ),
-
-          // Hint button
-          if (_phase == MemoryPhase.recall)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: _hintUnlocked && !_showingHint
-                      ? _showHint
-                      : null,
-                  icon: Icon(
-                    Icons.lightbulb_outline,
-                    color: _hintUnlocked
-                        ? AppColors.primary
-                        : AppColors.textSecondary,
-                    size: 16,
-                  ),
-                  label: Text(
-                    _hintUnlocked
-                        ? 'HINT — SHOW SEQUENCE AGAIN'
-                        : 'HINT AVAILABLE IN ${_hintCountdown}s',
-                    style: TextStyle(
-                      color: _hintUnlocked
-                          ? AppColors.primary
-                          : AppColors.textSecondary,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color: _hintUnlocked
-                          ? AppColors.primary.withOpacity(0.4)
-                          : AppColors.textSecondary.withOpacity(0.2),
-                    ),
-                  ),
-                ),
-              ),
-            ),
         ],
       ),
     );

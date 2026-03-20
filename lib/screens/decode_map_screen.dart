@@ -1,7 +1,11 @@
+// lib/screens/decode_map_screen.dart
+
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
 import '../utils/app_theme.dart';
+import '../widgets/timer_widget.dart';
 
 class DecodeMapScreen extends StatefulWidget {
   const DecodeMapScreen({super.key});
@@ -9,36 +13,167 @@ class DecodeMapScreen extends StatefulWidget {
   @override
   State<DecodeMapScreen> createState() => _DecodeMapScreenState();
 }
-void _confirmBack(BuildContext context) {
-    Navigator.pushNamed(context, '/mission');
-  }
+
 class _DecodeMapScreenState extends State<DecodeMapScreen> {
-  
   late List<String> _shuffledCodes;
-  late List<int> _correctAnswers; 
+  late List<int> _correctAnswers;
   final List<int?> _selectedLevels = [null, null, null, null];
   bool _checked = false;
   bool _won = false;
   int _attempts = 0;
 
-  
   final List<Map<String, dynamic>> _codeInfo = [
-    {'code': 'VAGLE', 'level': 1},
-    {'code': 'CC1',   'level': 2},
-    {'code': 'MG1',   'level': 4},
-    {'code': 'IR1',   'level': 3},
+    {'code': 'V.A.G.L.E.', 'level': 1},
+    {'code': 'LOCK', 'level': 2},
+    {'code': 'VAULT', 'level': 3},
+    {'code': 'TRACKS', 'level': 4},
   ];
+
+  // AI hint countdown
+  int _hintCountdown = 30;
+  bool _hintUnlocked = false;
+  Timer? _hintTimer;
+  bool _hintShown = false;
 
   @override
   void initState() {
     super.initState();
-    // Shuffle the display order
     _shuffledCodes = _codeInfo.map((c) => c['code'] as String).toList();
     _shuffledCodes.shuffle();
     _correctAnswers = _shuffledCodes
         .map((code) => _codeInfo
             .firstWhere((c) => c['code'] == code)['level'] as int)
         .toList();
+    _startHintTimer();
+  }
+
+  @override
+  void dispose() {
+    _hintTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startHintTimer() {
+    _hintTimer?.cancel();
+    setState(() {
+      _hintCountdown = 30;
+      _hintUnlocked = false;
+      _hintShown = false;
+    });
+    _hintTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) { _hintTimer?.cancel(); return; }
+      setState(() {
+        if (_hintCountdown > 0) {
+          _hintCountdown--;
+        } else {
+          _hintUnlocked = true;
+          _hintTimer?.cancel();
+        }
+      });
+      if (_hintCountdown == 0 && !_hintShown && !_won) {
+        setState(() => _hintShown = true);
+        context.read<GameProvider>().activeSession?.hintsUsed++;
+        Future.delayed(
+            const Duration(milliseconds: 100), _showAutoHint);
+      }
+    });
+  }
+
+  void _showAutoHint() {
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.psychology,
+                      color: AppColors.primary, size: 20),
+                  SizedBox(width: 8),
+                  Text('AI GAME MASTER',
+                      style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          letterSpacing: 1)),
+                ]),
+            const SizedBox(height: 16),
+            const Text(
+              'Remember which level gave you each code:',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                  color: AppColors.textSecondary, fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            ..._codeInfo.map((c) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(c['code'] as String,
+                            style: const TextStyle(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13)),
+                      ),
+                      const SizedBox(width: 10),
+                      const Icon(Icons.arrow_forward,
+                          color: AppColors.textSecondary, size: 14),
+                      const SizedBox(width: 10),
+                      Text('Level ${c['level']}',
+                          style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13)),
+                    ],
+                  ),
+                )),
+            const SizedBox(height: 20),
+            Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _feedbackBtn(
+                      Icons.thumb_up_alt_outlined, AppColors.success),
+                  const SizedBox(width: 14),
+                  _feedbackBtn(
+                      Icons.thumb_down_alt_outlined, AppColors.error),
+                ]),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _feedbackBtn(IconData icon, Color color) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pop(context);
+        _startHintTimer();
+      },
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.12),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: color.withOpacity(0.4)),
+        ),
+        child: Icon(icon, color: color, size: 24),
+      ),
+    );
   }
 
   void _checkAnswers() {
@@ -58,11 +193,18 @@ class _DecodeMapScreenState extends State<DecodeMapScreen> {
 
     if (allCorrect) {
       Future.delayed(const Duration(milliseconds: 600), () {
-        final code =
-            context.read<GameProvider>().activePuzzle!.decodeMap.code;
+        final code = context
+            .read<GameProvider>()
+            .activePuzzle!
+            .decodeMap
+            .code;
         context.read<GameProvider>().completeLevel(code);
       });
     }
+  }
+
+  void _confirmBack(BuildContext context) {
+    Navigator.pushNamed(context, '/mission');
   }
 
   @override
@@ -78,18 +220,57 @@ class _DecodeMapScreenState extends State<DecodeMapScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => _confirmBack(context),
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: TimerBadge(seconds: game.timeRemaining),
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const LevelTimerBar(),
+            const SizedBox(height: 8),
+
+            // AI hint countdown bar
+            Container(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(children: [
+                const Icon(Icons.psychology,
+                    color: AppColors.accent, size: 14),
+                const SizedBox(width: 6),
+                Text(
+                  _hintUnlocked
+                      ? '🤖 AI Hint ready!'
+                      : '🤖 AI Hint in ${_hintCountdown}s',
+                  style: TextStyle(
+                      color: _hintCountdown <= 10
+                          ? AppColors.accent
+                          : AppColors.textSecondary,
+                      fontSize: 12,
+                      fontWeight: _hintCountdown <= 10
+                          ? FontWeight.bold
+                          : FontWeight.normal),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: (30 - _hintCountdown) / 30,
+                      backgroundColor: AppColors.surfaceLight,
+                      valueColor: const AlwaysStoppedAnimation(
+                          AppColors.accent),
+                      minHeight: 4,
+                    ),
+                  ),
+                ),
+              ]),
+            ),
+            const SizedBox(height: 20),
+
             // Lock icon
             Center(
               child: Container(
@@ -105,8 +286,9 @@ class _DecodeMapScreenState extends State<DecodeMapScreen> {
                       width: 2),
                   boxShadow: [
                     BoxShadow(
-                      color: (_won ? AppColors.success : AppColors.primary)
-                          .withOpacity(0.2),
+                      color:
+                          (_won ? AppColors.success : AppColors.primary)
+                              .withOpacity(0.2),
                       blurRadius: 20,
                       spreadRadius: 4,
                     ),
@@ -164,8 +346,10 @@ class _DecodeMapScreenState extends State<DecodeMapScreen> {
             ...List.generate(_shuffledCodes.length, (i) {
               final code = _shuffledCodes[i];
               final selected = _selectedLevels[i];
-              final isCorrect = _checked && selected == _correctAnswers[i];
-              final isWrong = _checked && selected != _correctAnswers[i];
+              final isCorrect =
+                  _checked && selected == _correctAnswers[i];
+              final isWrong =
+                  _checked && selected != _correctAnswers[i];
 
               return Container(
                 margin: const EdgeInsets.only(bottom: 16),
@@ -192,7 +376,8 @@ class _DecodeMapScreenState extends State<DecodeMapScreen> {
                           color: AppColors.primary.withOpacity(0.15),
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
-                              color: AppColors.primary.withOpacity(0.4)),
+                              color:
+                                  AppColors.primary.withOpacity(0.4)),
                         ),
                         child: Text(code,
                             style: const TextStyle(
@@ -215,9 +400,9 @@ class _DecodeMapScreenState extends State<DecodeMapScreen> {
                             color: AppColors.error, size: 20),
                     ]),
                     const SizedBox(height: 12),
-                    // Level selector buttons 1-4
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment:
+                          MainAxisAlignment.spaceEvenly,
                       children: List.generate(4, (lvl) {
                         final levelNum = lvl + 1;
                         final isSelected = selected == levelNum;
@@ -229,7 +414,8 @@ class _DecodeMapScreenState extends State<DecodeMapScreen> {
                                     _checked = false;
                                   }),
                           child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
+                            duration:
+                                const Duration(milliseconds: 200),
                             width: 60,
                             height: 60,
                             decoration: BoxDecoration(
@@ -269,7 +455,8 @@ class _DecodeMapScreenState extends State<DecodeMapScreen> {
               Center(
                 child: Text('Attempts: $_attempts',
                     style: const TextStyle(
-                        color: AppColors.textSecondary, fontSize: 12)),
+                        color: AppColors.textSecondary,
+                        fontSize: 12)),
               ),
             const SizedBox(height: 16),
 
@@ -280,7 +467,8 @@ class _DecodeMapScreenState extends State<DecodeMapScreen> {
                 onPressed: !allSelected || _won ? null : _checkAnswers,
                 icon: const Icon(Icons.lock_open),
                 label: const Text('CRACK THE LOCK',
-                    style: TextStyle(fontSize: 16, letterSpacing: 1)),
+                    style:
+                        TextStyle(fontSize: 16, letterSpacing: 1)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
                       _won ? AppColors.success : AppColors.primary,
@@ -290,43 +478,6 @@ class _DecodeMapScreenState extends State<DecodeMapScreen> {
           ],
         ),
       ),
-    );
-  }
-}
-
-// Small timer badge for appbar
-class TimerBadge extends StatelessWidget {
-  final int seconds;
-  const TimerBadge({super.key, required this.seconds});
-
-  @override
-  Widget build(BuildContext context) {
-    final m = (seconds ~/ 60).toString().padLeft(2, '0');
-    final s = (seconds % 60).toString().padLeft(2, '0');
-    final isLow = seconds < 60;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: isLow
-            ? AppColors.error.withOpacity(0.2)
-            : AppColors.surfaceLight,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-            color: isLow
-                ? AppColors.error.withOpacity(0.5)
-                : Colors.transparent),
-      ),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Icon(Icons.timer,
-            size: 13,
-            color: isLow ? AppColors.error : AppColors.textSecondary),
-        const SizedBox(width: 4),
-        Text('$m:$s',
-            style: TextStyle(
-                color: isLow ? AppColors.error : AppColors.textPrimary,
-                fontWeight: FontWeight.bold,
-                fontSize: 14)),
-      ]),
     );
   }
 }
