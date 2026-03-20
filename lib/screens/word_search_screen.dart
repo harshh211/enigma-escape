@@ -135,7 +135,6 @@ class _WordSearchScreenState extends State<WordSearchScreen> {
             Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               _FeedbackBtn(
                 icon: Icons.thumb_up_alt_outlined,
-                label: 'Helpful',
                 color: AppColors.success,
                 onTap: () {
                   Navigator.pop(context);
@@ -145,7 +144,6 @@ class _WordSearchScreenState extends State<WordSearchScreen> {
               const SizedBox(width: 14),
               _FeedbackBtn(
                 icon: Icons.thumb_down_alt_outlined,
-                label: 'Not helpful',
                 color: AppColors.error,
                 onTap: () {
                   Navigator.pop(context);
@@ -514,12 +512,10 @@ class _WordPos {
 
 class _FeedbackBtn extends StatelessWidget {
   final IconData icon;
-  final String label;
   final Color color;
   final VoidCallback onTap;
   const _FeedbackBtn(
       {required this.icon,
-      required this.label,
       required this.color,
       required this.onTap});
 
@@ -527,22 +523,13 @@ class _FeedbackBtn extends StatelessWidget {
   Widget build(BuildContext context) => GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(
-              horizontal: 16, vertical: 10),
+          padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
             color: color.withOpacity(0.12),
             borderRadius: BorderRadius.circular(10),
             border: Border.all(color: color.withOpacity(0.4)),
           ),
-          child: Row(mainAxisSize: MainAxisSize.min, children: [
-            Icon(icon, color: color, size: 17),
-            const SizedBox(width: 6),
-            Text(label,
-                style: TextStyle(
-                    color: color,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13)),
-          ]),
+          child: Icon(icon, color: color, size: 24),
         ),
       );
 }
