@@ -168,23 +168,17 @@ class MemoryGridData {
 }
 
 class DecodeMapData {
-  final int pieces;
   final List<int> correctOrder;
-  final List<String> pieceLabels;
   final String code;
 
   DecodeMapData({
-    required this.pieces,
     required this.correctOrder,
-    required this.pieceLabels,
     required this.code,
   });
 
   factory DecodeMapData.fromJson(Map<String, dynamic> j) => DecodeMapData(
-        pieces: j['pieces'] as int,
-        correctOrder: List<int>.from(j['correct_order'] as List),
-        pieceLabels: List<String>.from(j['piece_labels'] as List),
-        code: j['code'] as String,
+        correctOrder: List<int>.from(j['correct_order'] as List? ?? []),
+        code: j['code'] as String? ?? '',
       );
 }
 

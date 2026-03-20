@@ -37,11 +37,7 @@
         "instruction": "Enter the level numbers where you found each code in order."
       }
     ],
-    "clues": [
-      { "id": "c1", "text": "The curator's badge was found near the VAULT room." },
-      { "id": "c2", "text": "Security footage shows someone in an ALARM-disabling uniform." },
-      { "id": "c3", "text": "A GUARD log shows an unauthorized entry at midnight." }
-    ],
+
     "wordsearch": {
       "id": "ws_001",
       "grid_size": 8,
@@ -109,10 +105,9 @@
       "code": "TRACKS"
     },
     "decode_map": {
-      "pieces": 4,
-      "correct_order": [2, 1, 4, 3],
-      "piece_labels": ["East Wing", "Main Hall", "Exit Route", "Vault Room"],
+      "correct_order": [1, 2, 3, 4],
       "code": "HORUS"
+
     },
     "final_passphrase": "VAGLE-LOCK-VAULT-TRACK-HORUS",
     "chapter_reveals": [
