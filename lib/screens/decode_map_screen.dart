@@ -72,7 +72,7 @@ class _DecodeMapScreenState extends State<DecodeMapScreen> {
       });
       if (_hintCountdown == 0 && !_hintShown && !_won) {
         setState(() => _hintShown = true);
-        context.read<GameProvider>().activeSession?.hintsUsed++;
+        context.read<GameProvider>().trackHintUsed();
         Future.delayed(
             const Duration(milliseconds: 100), _showAutoHint);
       }

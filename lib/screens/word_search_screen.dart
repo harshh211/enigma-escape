@@ -56,6 +56,7 @@ class _WordSearchScreenState extends State<WordSearchScreen> {
 
   void _showAutoHint() {
     final game = context.read<GameProvider>();
+    context.read<GameProvider>().trackHintUsed();
     final ws = game.activePuzzle?.wordsearch;
     if (ws == null) return;
 
