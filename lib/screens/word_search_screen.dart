@@ -17,8 +17,9 @@ class WordSearchScreen extends StatefulWidget {
 
 class _WordSearchScreenState extends State<WordSearchScreen> {
   Timer? _hintTimer;
-  int _hintCountdown =15;
-  bool _hintShown = false;
+  int _hintCountdown = 5;
+  bool _hintUnlocked = false;
+  bool _hintUsed = false;
 
   @override
   void initState() {
@@ -35,30 +36,39 @@ class _WordSearchScreenState extends State<WordSearchScreen> {
   void _startHintTimer() {
     _hintTimer?.cancel();
     setState(() {
-      _hintCountdown = 15;
-      _hintShown = false;
+      _hintCountdown = 5;
+      _hintUnlocked = false;
+      _hintUsed = false;
     });
+
     _hintTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!mounted) { _hintTimer?.cancel(); return; }
+      if (!mounted) {
+        _hintTimer?.cancel();
+        return;
+      }
+
       setState(() {
         if (_hintCountdown > 0) {
           _hintCountdown--;
         } else {
+          _hintUnlocked = true;
           _hintTimer?.cancel();
-          if (!_hintShown) {
-            _hintShown = true;
-            _showAutoHint();
-          }
         }
       });
     });
   }
 
-  void _showAutoHint() {
+  void _showManualHint() {
     final game = context.read<GameProvider>();
-    context.read<GameProvider>().trackHintUsed();
     final ws = game.activePuzzle?.wordsearch;
-    if (ws == null) return;
+
+    if (ws == null || !_hintUnlocked || _hintUsed) return;
+
+    setState(() {
+      _hintUsed = true;
+    });
+
+    context.read<GameProvider>().trackHintUsed();
 
     final remaining = ws.words
         .where((w) => !game.foundWords.contains(w.toUpperCase()))
@@ -66,13 +76,13 @@ class _WordSearchScreenState extends State<WordSearchScreen> {
 
     final hintText = remaining.isEmpty
         ? 'You have found all the words!'
-        : remaining.map((w) => '$w is yet to find').join(', ') + '.';
+        : '${remaining.map((w) => '$w is yet to find').join(', ')}.';
 
     _showHintDialog(
       title: 'WORD SEARCH HINT',
       icon: Icons.search,
       text: hintText,
-      reason: 'You have been on this level for 15 seconds.',
+      reason: 'You unlocked this hint after 15 seconds.',
     );
   }
 
@@ -87,8 +97,7 @@ class _WordSearchScreenState extends State<WordSearchScreen> {
       barrierDismissible: false,
       builder: (_) => AlertDialog(
         backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -112,13 +121,10 @@ class _WordSearchScreenState extends State<WordSearchScreen> {
             Text(text,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 15,
-                    height: 1.5)),
+                    color: AppColors.textPrimary, fontSize: 15, height: 1.5)),
             const SizedBox(height: 10),
             Container(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
                 color: AppColors.primary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(8),
@@ -156,16 +162,14 @@ class _WordSearchScreenState extends State<WordSearchScreen> {
     );
   }
 
-   void _showHintPassage(BuildContext context, List<String> words) {
+  void _showHintPassage(BuildContext context, List<String> words) {
     context.read<GameProvider>().activeSession?.hintsUsed++;
-    final passage =
-        context.read<GameProvider>().activePuzzle!.description;
+    final passage = context.read<GameProvider>().activePuzzle!.description;
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Row(children: [
           Icon(Icons.lightbulb, color: AppColors.primary, size: 20),
           SizedBox(width: 8),
@@ -176,14 +180,13 @@ class _WordSearchScreenState extends State<WordSearchScreen> {
                   fontWeight: FontWeight.bold)),
         ]),
         content: SingleChildScrollView(
-          child: _HighlightedPassage(
-              passage: passage, words: words),
+          child: _HighlightedPassage(passage: passage, words: words),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('CLOSE',
-                style: TextStyle(color: AppColors.accent)),
+            child:
+                const Text('CLOSE', style: TextStyle(color: AppColors.accent)),
           ),
         ],
       ),
@@ -214,8 +217,7 @@ class _WordSearchScreenState extends State<WordSearchScreen> {
             automaticallyImplyLeading: false,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
-              onPressed: () =>
-                  Navigator.pushNamed(context, '/mission'),
+              onPressed: () => Navigator.pushNamed(context, '/mission'),
             ),
             actions: [
               Center(
@@ -224,8 +226,7 @@ class _WordSearchScreenState extends State<WordSearchScreen> {
                   child: Text(
                     '${game.foundWords.length}/${ws.words.length} found',
                     style: const TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold),
+                        color: AppColors.primary, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -238,51 +239,53 @@ class _WordSearchScreenState extends State<WordSearchScreen> {
               // AI Hint countdown bar
               Container(
                 color: AppColors.surface,
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 8),
-                child: Row(children: [
-                  const Icon(Icons.psychology,
-                      color: AppColors.accent, size: 14),
-                  const SizedBox(width: 6),
-                  Text(
-                    _hintCountdown > 0
-                        ? '🤖 AI Hint in ${_hintCountdown}s'
-                        : '🤖 AI Hint ready!',
-                    style: TextStyle(
-                        color: _hintCountdown <= 10
-                            ? AppColors.accent
-                            : AppColors.textSecondary,
-                        fontSize: 12,
-                        fontWeight: _hintCountdown <= 10
-                            ? FontWeight.bold
-                            : FontWeight.normal),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: (15 - _hintCountdown) / 15,
-                        backgroundColor: AppColors.surfaceLight,
-                        valueColor: const AlwaysStoppedAnimation(
-                            AppColors.accent),
-                        minHeight: 4,
-                      ),
-                    ),
-                  ),
-                ]),
-              ),
-
+                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                 child: Row(
+                 children: [
+                   const Icon(Icons.psychology, color: AppColors.accent, size: 14),
+                   const SizedBox(width: 6),
+                    Text(
+                   _hintUnlocked
+                        ? '🤖 AI Hint ready!'
+                        : '🤖 AI Hint in ${_hintCountdown}s',
+                      style: TextStyle(color: _hintCountdown <= 10 && !_hintUnlocked
+                        ? AppColors.accent
+                        : AppColors.textSecondary,
+                    fontSize: 12,
+                    fontWeight: _hintCountdown <= 10 && !_hintUnlocked
+                        ? FontWeight.bold
+                        : FontWeight.normal,),),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: _hintUnlocked ? 1 : (15 - _hintCountdown) / 15,
+                            backgroundColor: AppColors.surfaceLight,
+                            valueColor: const AlwaysStoppedAnimation(AppColors.accent),
+                            minHeight: 4,),), ),]),),
+                    if (_hintUnlocked)
+                      Padding(padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: SizedBox(width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _hintUsed ? null : _showManualHint,
+                        icon: const Icon(Icons.psychology),
+                        label: Text(_hintUsed ? 'AI HINT USED' : 'GET AI HINT'),
+                          style: ElevatedButton.styleFrom(backgroundColor: AppColors.accent,
+                              foregroundColor: Colors.white,),
+                              ),
+                            ),
+                          ),
               // Instruction bar
               Container(
                 width: double.infinity,
                 color: AppColors.surface,
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: const Text(
                   'Find the 5 hidden words in the grid.',
-                  style: TextStyle(
-                      color: AppColors.textSecondary, fontSize: 12),
+                  style:
+                      TextStyle(color: AppColors.textSecondary, fontSize: 12),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -309,10 +312,8 @@ class _WordSearchScreenState extends State<WordSearchScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      onPressed: () =>
-                          _showHintPassage(context, ws.words),
-                      icon: const Icon(Icons.lightbulb_outline,
-                          size: 16),
+                      onPressed: () => _showHintPassage(context, ws.words),
+                      icon: const Icon(Icons.lightbulb_outline, size: 16),
                       label: const Text('VIEW PASSAGE HINT'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppColors.primary,
@@ -336,9 +337,8 @@ class _WordSearchScreenState extends State<WordSearchScreen> {
                       child: ElevatedButton.icon(
                         onPressed: game.selectedCells.isEmpty
                             ? null
-                            : () => context
-                                .read<GameProvider>()
-                                .submitSelection(),
+                            : () =>
+                                context.read<GameProvider>().submitSelection(),
                         icon: const Icon(Icons.check, size: 18),
                         label: const Text('SUBMIT WORD'),
                       ),
@@ -349,14 +349,13 @@ class _WordSearchScreenState extends State<WordSearchScreen> {
             ],
           ),
         ),
-        if (game.showHint)
-          const Positioned.fill(child: HintOverlay()),
+        if (game.showHint) const Positioned.fill(child: HintOverlay()),
       ],
     );
   }
 }
 
-// Grid widget 
+// Grid widget
 class _Grid extends StatelessWidget {
   final List<List<String>> grid;
   final int size;
@@ -414,8 +413,7 @@ class _Grid extends StatelessWidget {
               color: bg,
               borderRadius: BorderRadius.circular(4),
               border: isSelected
-                  ? Border.all(
-                      color: AppColors.cellSelected, width: 1.5)
+                  ? Border.all(color: AppColors.cellSelected, width: 1.5)
                   : null,
             ),
             child: Center(
@@ -435,13 +433,12 @@ class _Grid extends StatelessWidget {
   }
 }
 
-// Highlighted passage widget 
+// Highlighted passage widget
 class _HighlightedPassage extends StatelessWidget {
   final String passage;
   final List<String> words;
 
-  const _HighlightedPassage(
-      {required this.passage, required this.words});
+  const _HighlightedPassage({required this.passage, required this.words});
 
   @override
   Widget build(BuildContext context) {
@@ -471,12 +468,10 @@ class _HighlightedPassage extends StatelessWidget {
         spans.add(TextSpan(
           text: passage.substring(current, pos.start),
           style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 14,
-              height: 1.6),
+              color: AppColors.textSecondary, fontSize: 14, height: 1.6),
         ));
       }
-       spans.add(TextSpan(
+      spans.add(TextSpan(
         text: passage.substring(pos.start, pos.end),
         style: const TextStyle(
           color: AppColors.primary,
@@ -492,9 +487,7 @@ class _HighlightedPassage extends StatelessWidget {
       spans.add(TextSpan(
         text: passage.substring(current),
         style: const TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 14,
-            height: 1.6),
+            color: AppColors.textSecondary, fontSize: 14, height: 1.6),
       ));
     }
 
@@ -514,9 +507,7 @@ class _FeedbackBtn extends StatelessWidget {
   final Color color;
   final VoidCallback onTap;
   const _FeedbackBtn(
-      {required this.icon,
-      required this.color,
-      required this.onTap});
+      {required this.icon, required this.color, required this.onTap});
 
   @override
   Widget build(BuildContext context) => GestureDetector(
