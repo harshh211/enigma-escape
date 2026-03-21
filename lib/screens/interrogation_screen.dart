@@ -21,7 +21,6 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
   int _hintCountdown = 15;
   bool _hintUnlocked = false;
   Timer? _hintTimer;
-  bool _hintShownForThisQuestion = false;
 
   final List<String> _hints = [
     'Read the mission briefing carefully the answer is right there.',
@@ -44,85 +43,80 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
   }
 
   void _startHintTimer() {
-    _hintTimer?.cancel();
-    setState(() {
-      _hintCountdown = 15;
-      _hintUnlocked = false;
-      _hintShownForThisQuestion = false;
-    });
-    _hintTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (!mounted) {
-        _hintTimer?.cancel();
-        return;
-      }
-      setState(() {
-        if (_hintCountdown > 0) {
-          _hintCountdown--;
-        } else {
-          _hintUnlocked = true;
-          _hintTimer?.cancel();
-        }
-      });
-      if (_hintCountdown == 0 &&
-          !_answered &&
-          !_hintShownForThisQuestion) {
-        setState(() => _hintShownForThisQuestion = true);
-        context.read<GameProvider>().activeSession?.hintsUsed++;
-        Future.delayed(
-            const Duration(milliseconds: 100), _showHintDialog);
-      }
-    });
-  }
+  _hintTimer?.cancel();
+  setState(() {
+    _hintCountdown = 15;
+    _hintUnlocked = false;
+  });
 
-  void _showHintDialog() {
-    if (!mounted) return;
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.psychology,
-                      color: AppColors.primary, size: 20),
-                  SizedBox(width: 8),
-                  Text('AI GAME MASTER',
-                      style: TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                          letterSpacing: 1)),
-                ]),
-            const SizedBox(height: 16),
-            Text(
-              '→  ${_hints[_currentQuestion]}',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 15,
-                  height: 1.5),
-            ),
-            const SizedBox(height: 20),
-            Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _feedbackBtn(
-                      Icons.thumb_up_alt_outlined, AppColors.success),
-                  const SizedBox(width: 14),
-                  _feedbackBtn(
-                      Icons.thumb_down_alt_outlined, AppColors.error),
-                ]),
-          ],
-        ),
+  _hintTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+    if (!mounted) {
+      _hintTimer?.cancel();
+      return;
+    }
+
+    setState(() {
+      if (_hintCountdown > 0) {
+        _hintCountdown--;
+      } else {
+        _hintUnlocked = true;
+        _hintTimer?.cancel();
+      }
+    });
+  }); 
+} 
+ void _showHintDialog() {
+  if (!mounted || !_hintUnlocked) return;
+
+  context.read<GameProvider>().activeSession?.hintsUsed++;
+
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => AlertDialog(
+      backgroundColor: AppColors.surface,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20)),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.psychology,
+                    color: AppColors.primary, size: 20),
+                SizedBox(width: 8),
+                Text('AI GAME MASTER',
+                    style: TextStyle(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        letterSpacing: 1)),
+              ]),
+          const SizedBox(height: 16),
+          Text(
+            '→  ${_hints[_currentQuestion]}',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 15,
+                height: 1.5),
+          ),
+          const SizedBox(height: 20),
+          Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _feedbackBtn(
+                    Icons.thumb_up_alt_outlined, AppColors.success),
+                const SizedBox(width: 14),
+                _feedbackBtn(
+                    Icons.thumb_down_alt_outlined, AppColors.error),
+              ]),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   void _showPassageHint(BuildContext context) {
     context.read<GameProvider>().activeSession?.hintsUsed++;
@@ -233,7 +227,18 @@ class _InterrogationScreenState extends State<InterrogationScreen> {
               ),
             ]),
           ),
-
+          if (_hintUnlocked && !_answered)
+          Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: SizedBox(
+              width: double.infinity,
+               child: ElevatedButton.icon(
+                   onPressed: _showHintDialog,
+                     icon: const Icon(Icons.psychology),
+                     label: const Text('GET AI HINT'),
+                      style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                    ),),),),
           // Progress bar
           Container(
             color: AppColors.surface,
