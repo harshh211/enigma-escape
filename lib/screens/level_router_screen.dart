@@ -9,7 +9,7 @@ import 'color_cascade_screen.dart';
 import 'interrogation_screen.dart';
 import 'memory_grid_screen.dart';
 import 'decode_map_screen.dart';
-
+import 'math_screen.dart';
 class LevelRouterScreen extends StatelessWidget {
   const LevelRouterScreen({super.key});
 
@@ -37,6 +37,7 @@ class LevelRouterScreen extends StatelessWidget {
       3 => const InterrogationScreen(),
       4 => const MemoryGridScreen(),
       5 => const DecodeMapScreen(),
+      6 => const MathScreen(),
       _ => const WordSearchScreen(embedded: true),
     };
   }
@@ -186,7 +187,7 @@ class _LevelCompleteBanner extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Next: ${puzzle?.levels[level].title ?? ""}',
+                    'Next: ${(puzzle != null && level < puzzle.levels.length) ? puzzle.levels[level].title : "Circle Math"}',
                     style: const TextStyle(
                         color: AppColors.textSecondary, fontSize: 13),
                   ),
