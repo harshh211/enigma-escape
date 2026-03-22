@@ -86,6 +86,16 @@ class DatabaseHelper {
         reason    TEXT NOT NULL,
         priority  INTEGER DEFAULT 5
       )''');
+
+      // new add may cahneg 
+      await db.insert('hints', {
+      'hint_id': 'level6_hint1',
+      'puzzle_id': 'puzzle_001',
+      'type': 'wordSearch',
+      'text': 'The number is between 1 - 5.',
+      'reason': 'Level 6 hint',
+      'priority': 10,
+});
   }
 
   // ── Sessions ───────────────────────────────────────────────────────────────
