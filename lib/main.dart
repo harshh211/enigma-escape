@@ -12,6 +12,9 @@ import 'screens/achievements_screen.dart';
 import 'screens/leaderboard_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/story_screen.dart';
+import 'package:enigma_rooms/screens/math_screen.dart';
+
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,6 +47,7 @@ class EnigmaRoomsApp extends StatelessWidget {
             '/wordsearch':   (_) => const WordSearchScreen(),
             '/levels':       (_) => const LevelRouterScreen(),
             '/clues':        (_) => const ClueTrackerScreen(),
+            '/math':         (_) => const MathScreen(),
             '/achievements': (_) => const AchievementsScreen(),
             '/leaderboard':  (_) => const LeaderboardScreen(),
             '/settings':     (_) => const SettingsScreen(),
