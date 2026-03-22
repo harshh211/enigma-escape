@@ -35,9 +35,15 @@
         "type": "decode_map",
         "title": "Crack the Lock",
         "instruction": "Enter the level numbers where you found each code in order."
+      },
+    
+      {
+        "level": 6,
+        "type": "circle_math",
+        "title": "Circle Math",
+        "instruction": "Each colored circle represents a different digit. Solve the addition puzzle."
       }
     ],
-
     "wordsearch": {
       "id": "ws_001",
       "grid_size": 8,
@@ -122,7 +128,8 @@
       { "id": "lach_002", "name": "Wire Expert", "description": "Connected all wires correctly in Level 2" },
       { "id": "lach_003", "name": "Interrogator", "description": "Answered all questions correctly in Level 3" },
       { "id": "lach_004", "name": "Memory Master", "description": "Memorized and repeated the sequence in Level 4" },
-      { "id": "lach_005", "name": "Lock Breaker", "description": "Cracked the final lock in Level 5" }
+      { "id": "lach_005", "name": "Lock Breaker", "description": "Cracked the final lock in Level 5" },
+      { "id": "lach_006", "name": "Math Genius", "description": "Solved the circle math puzzle in Level 6" }
     ]
   }
 ]
