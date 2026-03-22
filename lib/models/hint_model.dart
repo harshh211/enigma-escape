@@ -16,7 +16,7 @@ class Hint {
     required this.type,
     required this.text,
     required this.reason,
-    this.priority = 5,
+    this.priority = 6,
   });
 
   Map<String, dynamic> toMap() => {
@@ -34,7 +34,7 @@ class Hint {
         type: (m['type'] as String) == 'story' ? HintType.story : HintType.wordSearch,
         text: m['text'] as String,
         reason: m['reason'] as String,
-        priority: m['priority'] as int? ?? 5,
+        priority: m['priority'] as int? ?? 6,
       );
 }
 
