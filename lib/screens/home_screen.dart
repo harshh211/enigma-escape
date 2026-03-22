@@ -142,8 +142,7 @@ class _NameEntry extends StatelessWidget {
                     if (name.isNotEmpty) onEnter(name);
                   },
                   icon: const Icon(Icons.play_arrow, size: 24),
-                  label: const Text('ENTER THE ROOM',
-                      style: TextStyle(fontSize: 16, letterSpacing: 1)),
+                  label: const Text('ENTER THE ROOM',),
                 ),
               ),
             ],
@@ -258,7 +257,7 @@ class _MissionSelect extends StatelessWidget {
                           children: [
                             _StatChip(Icons.timer,
                                 '${(puzzle.timeLimitSec / 60).round()} min'),
-                            _StatChip(Icons.layers, '5 Levels'),
+                            _StatChip(Icons.layers, '6 Levels'),
                             
                           ],
                         ),
@@ -310,12 +309,16 @@ class _MissionSelect extends StatelessWidget {
                           width: double.infinity,
                           height: 54,
                           child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              textStyle: const TextStyle(
+                                fontSize: 16,
+                                letterSpacing: 1,
+                              )
+                            ),
                             onPressed: () => _startMission(context),
                             icon: const Icon(Icons.play_arrow,
                                 size: 22),
-                            label: const Text('START MISSION',
-                                style: TextStyle(
-                                    fontSize: 16, letterSpacing: 1)),
+                            label: const Text('START MISSION',),
                           ),
                         ),
                       ],
