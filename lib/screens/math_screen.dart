@@ -181,8 +181,8 @@ class _MathScreenState extends State<MathScreen> {
     final Color yellow = Colors.yellow.shade700;
 
     final hintProgress = game.hintAvailable
-        ? 3.0
-        : (60 - game.hintCooldownRemaining) / 30;
+        ? 0.30
+        : (30 - game.hintCooldownRemaining) / 10;
 
     return Stack(
       children: [
